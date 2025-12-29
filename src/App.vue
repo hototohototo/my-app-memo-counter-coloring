@@ -3,12 +3,16 @@
 // コードの理解、色塗りページの追加　
 // firebase認証、firestoreによるデータ保存
 // ホーム画面を作成することで、各ページに遷移できるようにするかつ、リンクとして機能させる
+// プロフィール設定画面を独立して作成する
+// データベースに保存された情報を、認証されたユーザーのメールアドレスに送信する
+
 
 // デプロイ先URL
 // https://my-app-memo-counter-coloring.vercel.app/
 
 import { ref } from 'vue'
-import ButtonCounter from './ButtonCounter.vue'
+import ButtonCounter from './components/ButtonCounter.vue'
+import Profile from './views/Profile.vue'
 // import SelectColor from './SelectColor.vue'
 import { useRouter, useRoute } from 'vue-router'
 
@@ -100,6 +104,7 @@ const loadData = async () => {
     memoText.value = data.memoText || ''
     window1Color.value = data.window1Color || 'white'
     window2Color.value = data.window2Color || 'white'
+    console.log('loadData: loaded', data)
   }
 }
 
@@ -149,10 +154,12 @@ const resetWindows = () => {
 const router = useRouter()
 const route = useRoute()
 
+const goHome = () => router.push('/')
 const goCounter = () => router.push('/counter')
 const goCounter2 = () => router.push('/counter2')
 const goMemo = () => router.push('/memo')
 const goColoring = () => router.push('/coloring')
+const goProfile = () => router.push('/profile')
 const red = () => selectedColor.value = 1
 const blue = () => selectedColor.value = 2
 
@@ -183,16 +190,21 @@ watch([counterBig, counterMid, memoText, counterBig2, counterMid2, window1Color,
 
 
   <div class="nav">
+    <button @click="goHome">ホーム</button>
     <button @click="goCounter">カウンター</button>
     <button @click="goCounter2">カウンター2</button>
-
     <button @click="goMemo">メモ帳</button>
-
     <button @click="goColoring">色塗り</button>
+    <button @click="goProfile">プロフィール</button>
     <button @click="resetAll" class="counter-reset">カウンターリセット</button>
   </div>
 
   <div class="page">
+    <!-- ホーム画面のページ -->
+    <div v-if="route.path === '/home' || route.path === '/'">
+      <h1>カウンタ・メモ・色塗りができます</h1>
+    </div>
+
     <!-- カウンターページ -->
     <div v-if="route.path === '/counter'">
       <h1>カウンター</h1>
@@ -233,6 +245,11 @@ watch([counterBig, counterMid, memoText, counterBig2, counterMid2, window1Color,
         ウィンドウ2 (クリックして塗る)
       </div>
     </div>
+    </div>
+
+    <!-- プロフィールページ -->
+    <div v-else-if="route.path === '/profile'">
+      <Profile />
     </div>
   </div>
 </template>
