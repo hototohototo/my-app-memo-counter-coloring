@@ -2,6 +2,10 @@
 //やりたいこと
 // コードの理解、色塗りページの追加　
 // firebase認証、firestoreによるデータ保存
+// ホーム画面を作成することで、各ページに遷移できるようにするかつ、リンクとして機能させる
+
+// デプロイ先URL
+// https://my-app-memo-counter-coloring.vercel.app/
 
 import { ref } from 'vue'
 import ButtonCounter from './ButtonCounter.vue'
@@ -124,14 +128,14 @@ const resetAll = () => {
 
 
 const paintWindow1 = () => {
-  if (selectedColor.value === 1) window1Color.value = '#d32f2f'
-  else if (selectedColor.value === 2) window1Color.value = '#3515d7'
+  if (selectedColor.value === 1) window1Color.value = 'red'//'#d32f2f'
+  else if (selectedColor.value === 2) window1Color.value = 'blue'//'#3515d7'
   // saveData()
 }
 
 const paintWindow2 = () => {
-  if (selectedColor.value === 1) window2Color.value = '#d32f2f'
-  else if (selectedColor.value === 2) window2Color.value = '#3515d7'
+  if (selectedColor.value === 1) window2Color.value = 'red'//'#d32f2f'
+  else if (selectedColor.value === 2) window2Color.value = 'blue'//'#3515d7'
   // saveData()
 }
 
