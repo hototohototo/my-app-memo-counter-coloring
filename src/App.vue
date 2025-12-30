@@ -10,7 +10,12 @@
 // デプロイ先URL
 // https://my-app-memo-counter-coloring.vercel.app/
 
+// console.log('EMAILJS SERVICE_ID:', import.meta.env.VITE_EMAILJS_SERVICE_ID)
+// console.log('EMAILJS TEMPLATE_ID:', import.meta.env.VITE_EMAILJS_TEMPLATE_ID)
+// console.log('EMAILJS PUBLIC_KEY:', import.meta.env.VITE_EMAILJS_PUBLIC_KEY)
+
 import { ref } from 'vue'
+import emailjs from '@emailjs/browser'
 import ButtonCounter from './components/ButtonCounter.vue'
 import Profile from './views/Profile.vue'
 // import SelectColor from './SelectColor.vue'
@@ -44,6 +49,7 @@ const signup = async () => {
 const user = ref(null)
 const email = ref('')
 const password = ref('')
+const userName = ref('')
 
 // ログイン
 const login = async () => {
@@ -64,6 +70,7 @@ onAuthStateChanged(auth, (currentUser) => {
   user.value = currentUser
   if (currentUser) {
     loadData()  // ログインしたらデータを読み込む
+    loadUserName()
   }
 })
 
@@ -108,6 +115,16 @@ const loadData = async () => {
   }
 }
 
+// ユーザー名読み込み
+// ログイン時または必要なタイミングで Profile データを読み込む
+const loadUserName = async () => {
+  if (!user.value) return
+  const path = `users/${user.value.uid}/profile`
+  const snapshot = await get(dbRef(db, path))
+  if (snapshot.exists()) {
+    userName.value = snapshot.val().userName || ''
+  }
+}
 
 // 状態は親で管理
 const counterBig = ref(0)
@@ -117,6 +134,7 @@ const counterBig2 = ref(0)
 const counterMid2 = ref(0)
 
 const memoText = ref('')
+const sendingEmail = ref(false)
 
 const selectedColor = ref(0)
 const window1Color = ref('white')
@@ -150,9 +168,57 @@ const resetWindows = () => {
   alert('ウィンドウをリセットしました')
 }
 
+// メモをログイン中のユーザー宛にメール送信
+const emailServiceId = import.meta.env.VITE_EMAILJS_SERVICE_ID
+const emailTemplateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID
+const emailPublicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+
+const sendMemoEmail = async () => {
+  if (!user.value) {
+    alert('ログインしてください')
+    return
+  }
+  if (!memoText.value.trim()) {
+    alert('メモが空です')
+    return
+  }
+  if (!emailServiceId || !emailTemplateId || !emailPublicKey) {
+    alert('メール送信の設定が不足しています。VITE_EMAILJS_SERVICE_ID / VITE_EMAILJS_TEMPLATE_ID / VITE_EMAILJS_PUBLIC_KEY を設定してください。')
+    return
+  }
+
+  sendingEmail.value = true
+
+  try {
+    await loadUserName()
+    const sendTime = new Date().toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' }) // 送信時刻（日本時間）
+    await emailjs.send(
+      emailServiceId,
+      emailTemplateId,
+      {
+        userName: userName.value || 'ユーザー',
+        to_email: user.value.email,
+        memo_text: memoText.value,
+        from_email: user.value.email,
+        send_time: sendTime
+      },
+      { publicKey: emailPublicKey }
+    )
+    
+    alert('メモをメールで送信しました')
+  } catch (e) {
+    console.error('メール送信エラー:', e)
+    alert('メール送信に失敗しました: ' + (e.text || e.message || e))
+  } finally {
+    sendingEmail.value = false
+  }
+}
+
 // ページ切替
 const router = useRouter()
 const route = useRoute()
+
+
 
 const goHome = () => router.push('/')
 const goCounter = () => router.push('/counter')
@@ -226,6 +292,9 @@ watch([counterBig, counterMid, memoText, counterBig2, counterMid2, window1Color,
       <h1>メモ帳</h1>
       <textarea v-model="memoText" @input="saveData" placeholder="メモを書いてください" rows="10" cols="30"></textarea>
       <p>メモ内容: {{ memoText }}</p>
+      <button @click="sendMemoEmail" :disabled="sendingEmail" class="send-email-button">
+        {{ sendingEmail ? '送信中...' : 'メモをメールで送信' }}
+      </button>
     </div>
 
 
@@ -327,6 +396,21 @@ textarea {
   font-size: 14px;
   cursor: pointer;
   color: black;
+}
+
+.send-email-button {
+  margin-top: 15px;
+  padding: 10px 16px;
+  font-size: 15px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+}
+
+.send-email-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 </style>
