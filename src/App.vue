@@ -7,6 +7,13 @@
 // データベースに保存された情報を、認証されたユーザーのメールアドレスに送信する
 
 
+// バックエンド（サーバ側）をさわる
+// UIきれいにしたい
+// プロフィール情報を増やす
+// ログイン時メールアドレスの本人確認
+// LINEログイン認証
+
+
 // デプロイ先URL
 // https://my-app-memo-counter-coloring.vercel.app/
 
@@ -145,7 +152,6 @@ const resetAll = () => {
   counterMid.value = 0
   counterBig2.value = 0
   counterMid2.value = 0
-  // memoText.value = ''
   alert('カウンターをリセットしました')
 }
 
@@ -190,7 +196,7 @@ const sendMemoEmail = async () => {
   sendingEmail.value = true
 
   try {
-    await loadUserName()
+    await loadUserName() // 最新データを読み込む
     const sendTime = new Date().toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' }) // 送信時刻（日本時間）
     await emailjs.send(
       emailServiceId,
@@ -254,17 +260,7 @@ watch([counterBig, counterMid, memoText, counterBig2, counterMid2, window1Color,
     <p>ようこそ、{{ user.email }} さん！ <button @click="logout">ログアウト</button></p>
   </div>  
 
-
-  <div class="nav">
-    <button @click="goHome">ホーム</button>
-    <button @click="goCounter">カウンター</button>
-    <button @click="goCounter2">カウンター2</button>
-    <button @click="goMemo">メモ帳</button>
-    <button @click="goColoring">色塗り</button>
-    <button @click="goProfile">プロフィール</button>
-    <button @click="resetAll" class="counter-reset">カウンターリセット</button>
-  </div>
-
+  <!-- ナビゲーション -->
   <div class="page">
     <!-- ホーム画面のページ -->
     <div v-if="route.path === '/home' || route.path === '/'">
@@ -277,6 +273,7 @@ watch([counterBig, counterMid, memoText, counterBig2, counterMid2, window1Color,
       <ButtonCounter v-model="counterBig" label="大" />
       <ButtonCounter v-model="counterMid" label="中" />
       <p>大 = {{ counterBig }}, 中 = {{ counterMid }}</p>
+      <button @click="resetAll" class="counter-reset">カウンターリセット</button>
     </div>
 
     <!-- カウンター2ページ -->
@@ -291,7 +288,9 @@ watch([counterBig, counterMid, memoText, counterBig2, counterMid2, window1Color,
     <div v-else-if="route.path === '/memo'">
       <h1>メモ帳</h1>
       <textarea v-model="memoText" @input="saveData" placeholder="メモを書いてください" rows="10" cols="30"></textarea>
-      <p>メモ内容: {{ memoText }}</p>
+      <!-- <p>メモ内容: {{ memoText }}</p> -->
+      <p>※メモ内容は自動保存されます</p>
+      
       <button @click="sendMemoEmail" :disabled="sendingEmail" class="send-email-button">
         {{ sendingEmail ? '送信中...' : 'メモをメールで送信' }}
       </button>
@@ -320,19 +319,44 @@ watch([counterBig, counterMid, memoText, counterBig2, counterMid2, window1Color,
     <div v-else-if="route.path === '/profile'">
       <Profile />
     </div>
+
+    <div class="nav">
+      <button @click="goHome" title="ホーム">🏠</button>
+      <button @click="goCounter" title="カウンタ">🔢</button>
+      <button @click="goMemo" title="メモ帳">📝</button>
+      <button @click="goColoring" title="色塗り">🎨</button>
+      <button @click="goProfile" title="プロフィール">👤</button>
+    </div>
+
+
   </div>
 </template>
 
 <style>
 .nav {
+  display: flex;
   text-align: center;
-  margin-top: 30px;
+  /* margin-top: 30px; */
+  position: fixed;  /* 画面に固定 */
+  bottom: 0px;        /* 下端に配置 */
+  background-color: #fff;  /* 背景を白に */
+  border-top: 0px solid #ddd;  /* 上に区切り線 */
+  border-bottom: 0px solid #ddd;  /* 下に区切り線 */
+  padding: 0px 0px;  /* 上下左右の余白 */
+  /* width: 100%;       横幅いっぱいに */
+  z-index: 100;  /* 他の要素より前面に */
+  box-shadow:  0 0 10px 2px rgba(0, 0, 0, 1);  /* 影を付けて浮いた感じに */
 }
 .nav button {
-  margin: 5px;
-  padding: 10px 15px;
-  font-size: 16px;
+  margin: 2px;
+  padding: 10px 10px;
+  font-size: 35px;
   cursor: pointer;
+}
+.nav :hover {
+  background: #ddd;          /* ホバー時の背景色 */
+  color: #000;               /* 文字色を濃く */
+  cursor: text;
 }
 
 .page {
@@ -340,8 +364,9 @@ watch([counterBig, counterMid, memoText, counterBig2, counterMid2, window1Color,
   margin-top: 50px;
 }
 textarea {
+  margin-top: 10px;
   font-size: 16px;
-  padding: 5px;
+  padding: 10px;
 }
 
 .counter-reset {
@@ -399,13 +424,17 @@ textarea {
 }
 
 .send-email-button {
-  margin-top: 15px;
-  padding: 10px 16px;
+  margin-top: 0px;
+  padding: 10px 8px;
   font-size: 15px;
   background-color: #4CAF50;
   color: white;
-  border: none;
-  border-radius: 5px;
+  /* border: none; */
+  border-radius: 10px;
+  width: 160px;           /* ← 幅を指定 */
+  height: 45px;           /* ← 高さを指定 */
+  font-size: 15px;      /* ← フォントサイズを指定 */
+  cursor: pointer;
 }
 
 .send-email-button:disabled {
