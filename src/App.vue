@@ -348,15 +348,34 @@ watch([counterBig, counterMid, memoText, counterBig2, counterMid2, window1Color,
   box-shadow:  0 0 10px 2px rgba(0, 0, 0, 1);  /* 影を付けて浮いた感じに */
 }
 .nav button {
-  margin: 2px;
+  /* margin: 2px;
   padding: 10px 10px;
-  font-size: 35px;
+  font-size: 35px; */
+  font-size: 13.3vw;      /* ビューポート幅の 14.25% */
+  padding: 0 0;
+  /* width: 30%;          親（ナビ）の幅の 20% */
   cursor: pointer;
 }
 .nav :hover {
   background: #ddd;          /* ホバー時の背景色 */
   color: #000;               /* 文字色を濃く */
   cursor: text;
+}
+
+/* タブレット以上 */
+@media (min-width: 768px) {
+  .nav button {
+    font-size: 32px;
+    padding: 12px 0;
+  }
+}
+
+/* PC以上 */
+@media (min-width: 1024px) {
+  .nav button {
+    font-size: 36px;
+    padding: 15px 0;
+  }
 }
 
 .page {
