@@ -141,10 +141,11 @@ const genderCategory = ref([
 
         <div class="profile-item">
           <label>ひとこと</label>
-            <div>
-              <!-- <label> 身長 </label> -->
-              <input v-model="comment" type="text" 
-              placeholder="ひとこと入力"/>
+            <div class = "comment-input">
+              <textarea v-model="comment" type="text" placeholder="ひとこと入力" rows="10" cols="30"></textarea>
+
+              <!-- <input v-model="comment" type="text" 
+              placeholder="ひとこと入力"/> -->
             </div>
         </div>
 
@@ -167,7 +168,7 @@ const genderCategory = ref([
 .profile-page {
   text-align: center;
   padding: 20px;
-  margin-bottom: 400px;
+  /* margin-bottom: 400px; */
 }
 
 .profile-content {
@@ -228,6 +229,16 @@ const genderCategory = ref([
   width: 200px;
   padding: 8px;
   font-size: 20px;
+  /* border: 1px solid #000000; */
+  /* border-radius: 100px; */
+}
+
+.comment-input {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 8px;
+  font-size: 16px;
   /* border: 1px solid #000000; */
   /* border-radius: 100px; */
 }

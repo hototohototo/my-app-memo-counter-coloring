@@ -20,8 +20,9 @@ const increase = () => emit('update:modelValue', modelValue + 1)
 
 <style scoped>
 button {
-  padding: 10px 20px;
+  padding: 20px 80px;
   font-size: 18px;
-  margin: 5px;
+  margin: 30px;
+  touch-action: manipulation;  /* ← これを追加 */
 }
 </style>

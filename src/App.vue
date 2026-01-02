@@ -274,6 +274,7 @@ watch([counterBig, counterMid, memoText, counterBig2, counterMid2, window1Color,
       <ButtonCounter v-model="counterMid" label="中" />
       <p>大 = {{ counterBig }}, 中 = {{ counterMid }}</p>
       <button @click="resetAll" class="counter-reset">カウンターリセット</button>
+      <div class="underline"></div>
     </div>
 
     <!-- カウンター2ページ -->
@@ -294,6 +295,7 @@ watch([counterBig, counterMid, memoText, counterBig2, counterMid2, window1Color,
       <button @click="sendMemoEmail" :disabled="sendingEmail" class="send-email-button">
         {{ sendingEmail ? '送信中...' : 'メモをメールで送信' }}
       </button>
+      <div class="underline"></div>
     </div>
 
 
@@ -312,21 +314,24 @@ watch([counterBig, counterMid, memoText, counterBig2, counterMid2, window1Color,
       <div class="color-window" :style="{ backgroundColor: window2Color }" @click="paintWindow2">
         ウィンドウ2 (クリックして塗る)
       </div>
+      <div class="underline"></div>
     </div>
     </div>
 
     <!-- プロフィールページ -->
     <div v-else-if="route.path === '/profile'">
       <Profile />
+      <div class="underline"></div>
     </div>
 
     <div class="nav">
-      <button @click="goHome" title="ホーム">🏠</button>
-      <button @click="goCounter" title="カウンタ">🔢</button>
+      <button @click="goHome" title="ホーム"><img src="/image/icon_home.png" class="nav-icon"/></button>
+      <button @click="goCounter" title="カウンタ"><img src="/image/icon_counter.JPG" class="nav-icon"/></button>
       <button @click="goMemo" title="メモ帳">📝</button>
       <button @click="goColoring" title="色塗り">🎨</button>
       <button @click="goProfile" title="プロフィール">👤</button>
     </div>
+
 
 
   </div>
@@ -335,31 +340,33 @@ watch([counterBig, counterMid, memoText, counterBig2, counterMid2, window1Color,
 <style>
 .nav {
   display: flex;
-  text-align: center;
-  /* margin-top: 30px; */
-  position: fixed;  /* 画面に固定 */
-  bottom: 0px;        /* 下端に配置 */
-  background-color: #fff;  /* 背景を白に */
-  border-top: 0px solid #ddd;  /* 上に区切り線 */
-  border-bottom: 0px solid #ddd;  /* 下に区切り線 */
-  padding: 0px 0px;  /* 上下左右の余白 */
-  /* width: 100%;       横幅いっぱいに */
-  z-index: 100;  /* 他の要素より前面に */
-  box-shadow:  0 0 10px 2px rgba(0, 0, 0, 1);  /* 影を付けて浮いた感じに */
+  position: fixed;
+  bottom: 0px;
+  left: 0;
+  right: 0;
+  width: 97%;
+  background-color: #fff;
+  border-top: 1px solid #ddd;
+  padding: 8px 1.5%;
+  z-index: 100;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.15);
+  justify-content: space-around;
+  align-items: center;
 }
 .nav button {
-  /* margin: 2px;
-  padding: 10px 10px;
-  font-size: 35px; */
-  font-size: 13.3vw;      /* ビューポート幅の 14.25% */
-  padding: 0 0;
-  /* width: 30%;          親（ナビ）の幅の 20% */
+  flex: 1 1 0;
+  min-width: 0;
+  margin: 0;
+  padding: 8px 0;
+  font-size: 12vw;
+  background: none;
+  border: none;
   cursor: pointer;
+  touch-action: manipulation;
 }
-.nav :hover {
-  background: #ddd;          /* ホバー時の背景色 */
-  color: #000;               /* 文字色を濃く */
-  cursor: text;
+.nav button:hover {
+  background: #f0f0f0;
+  color: #000;
 }
 
 /* タブレット以上 */
@@ -377,6 +384,21 @@ watch([counterBig, counterMid, memoText, counterBig2, counterMid2, window1Color,
     padding: 15px 0;
   }
 }
+
+.nav-icon {
+  width: 78px;
+  height: 79px;
+  display: block;
+}
+
+/* スマホ用に相対サイズ */
+/* @media (max-width: 767px) {
+  .nav-icon {
+    width: 8vw;
+    height: 8vw;
+  }
+} */
+
 
 .page {
   text-align: center;
@@ -405,8 +427,8 @@ textarea {
   color: white;               /* 文字色を白に */
   border: none;
   border-radius: 5px;
-  margin: 5px;
-  padding: 10px 15px;
+  margin: 4px;
+  padding: 20px 30px;
 }
 .coloring-select-red:hover {
   color: black; /* ホバー時に文字色を黒に */
@@ -417,8 +439,8 @@ textarea {
   color: white;               /* 文字色を白に */
   border: none;
   border-radius: 5px;
-  margin: 5px;
-  padding: 10px 15px;
+  margin: 4px;
+  padding: 20px 30px;
 }
 .coloring-select-blue:hover {
   color: black; /* ホバー時に文字色を黒に */
@@ -427,6 +449,7 @@ textarea {
 
 .windows {
   display: flex;
+  /* margin-bottom: 400px; */
   justify-content: center;
   gap: 20px;
 }
@@ -440,6 +463,10 @@ textarea {
   font-size: 14px;
   cursor: pointer;
   color: black;
+}
+
+.underline {
+  margin-top: 400px; /* ナビゲーションバー分の余白を確保 */
 }
 
 .send-email-button {
