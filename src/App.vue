@@ -6,7 +6,8 @@
 // プロフィール設定画面を独立して作成する
 // データベースに保存された情報を、認証されたユーザーのメールアドレスに送信する
 
-
+// それぞれのページごとにファイルを独立させる
+// 塗り絵を、任意の画像でできるようにする(canvas)
 // バックエンド（サーバ側）をさわる
 // UIきれいにしたい
 // プロフィール情報を増やす
@@ -23,7 +24,8 @@
 
 import { ref } from 'vue'
 import emailjs from '@emailjs/browser'
-import ButtonCounter from './components/ButtonCounter.vue'
+// import ButtonCounter from './components/ButtonCounter.vue'
+import Counter from './views/Counter.vue'
 import Profile from './views/Profile.vue'
 // import SelectColor from './SelectColor.vue'
 import { useRouter, useRoute } from 'vue-router'
@@ -90,8 +92,8 @@ const saveData = async () => {
   const path = `users/${user.value.uid}/appData`
   try {
     await set(dbRef(db, path), {
-      counterBig: counterBig.value,
-      counterMid: counterMid.value,
+      // counterBig: counterBig.value,
+      // counterMid: counterMid.value,
       memoText: memoText.value,
       counterBig2: counterBig2.value,
       counterMid2: counterMid2.value,
@@ -111,8 +113,8 @@ const loadData = async () => {
   const snapshot = await get(dbRef(db, path))
   if (snapshot.exists()) {
     const data = snapshot.val()
-    counterBig.value = data.counterBig || 0
-    counterMid.value = data.counterMid || 0
+    // counterBig.value = data.counterBig || 0
+    // counterMid.value = data.counterMid || 0
     counterBig2.value = data.counterBig2 || 0
     counterMid2.value = data.counterMid2 || 0
     memoText.value = data.memoText || ''
@@ -134,8 +136,8 @@ const loadUserName = async () => {
 }
 
 // 状態は親で管理
-const counterBig = ref(0)
-const counterMid = ref(0)
+// const counterBig = ref(0)
+// const counterMid = ref(0)
 
 const counterBig2 = ref(0)
 const counterMid2 = ref(0)
@@ -147,13 +149,13 @@ const selectedColor = ref(0)
 const window1Color = ref('white')
 const window2Color = ref('white')
 
-const resetAll = () => {
-  counterBig.value = 0
-  counterMid.value = 0
-  counterBig2.value = 0
-  counterMid2.value = 0
-  alert('カウンターをリセットしました')
-}
+// const resetAll = () => {
+//   counterBig.value = 0
+//   counterMid.value = 0
+//   counterBig2.value = 0
+//   counterMid2.value = 0
+//   alert('カウンターをリセットしました')
+// }
 
 
 const paintWindow1 = () => {
@@ -228,7 +230,7 @@ const route = useRoute()
 
 const goHome = () => router.push('/')
 const goCounter = () => router.push('/counter')
-const goCounter2 = () => router.push('/counter2')
+// const goCounter2 = () => router.push('/counter2')
 const goMemo = () => router.push('/memo')
 const goColoring = () => router.push('/coloring')
 const goProfile = () => router.push('/profile')
@@ -236,7 +238,7 @@ const red = () => selectedColor.value = 1
 const blue = () => selectedColor.value = 2
 
 let timer
-watch([counterBig, counterMid, memoText, counterBig2, counterMid2, window1Color, window2Color], () => {
+watch([memoText, window1Color, window2Color], () => {
   clearTimeout(timer)
   timer = setTimeout(() => saveData(), 500)
 })
@@ -268,22 +270,27 @@ watch([counterBig, counterMid, memoText, counterBig2, counterMid2, window1Color,
     </div>
 
     <!-- カウンターページ -->
-    <div v-if="route.path === '/counter'">
+    <!-- <div v-if="route.path === '/counter'">
       <h1>カウンター</h1>
       <ButtonCounter v-model="counterBig" label="大" />
       <ButtonCounter v-model="counterMid" label="中" />
       <p>大 = {{ counterBig }}, 中 = {{ counterMid }}</p>
       <button @click="resetAll" class="counter-reset">カウンターリセット</button>
       <div class="underline"></div>
+    </div> -->
+    <!-- カウンターページ -->
+    <div v-else-if="route.path === '/counter'">
+      <Counter />
+      <div class="underline"></div>
     </div>
 
     <!-- カウンター2ページ -->
-    <div v-else-if="route.path === '/counter2'">
+    <!-- <div v-else-if="route.path === '/counter2'">
       <h1>カウンター2</h1>
       <ButtonCounter v-model="counterBig2" label="大" />
       <ButtonCounter v-model="counterMid2" label="中" />
       <p>大2 = {{ counterBig2 }}, 中2 = {{ counterMid2 }}</p>
-    </div>
+    </div> -->
 
     <!-- メモページ -->
     <div v-else-if="route.path === '/memo'">
@@ -410,16 +417,16 @@ textarea {
   padding: 10px;
 }
 
-.counter-reset {
+/* .counter-reset {
   background-color: #3515d7; /* 赤色 */
-  color: white;               /* 文字色を白に */
-  border: none;
-  border-radius: 5px;
-}
+  /* color: white;               文字色を白に */
+  /* border: none;
+  border-radius: 5px; */
+/* } */
 
-.counter-reset:hover {
+/* .counter-reset:hover {
   background-color: #d32f2f; /* ホバー時に少し濃く */
-}
+/* }  */ 
 
 
 .coloring-select-red {

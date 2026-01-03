@@ -9,8 +9,13 @@ import { auth, db } from '../firebase.js'
 import { onAuthStateChanged } from 'firebase/auth'
 import { ref as dbRef, set, get } from 'firebase/database'
 
+import { useAuth } from '../composables/useAuth.js'
+import { useFirebaseData } from '../composables/useFirebaseData'
+
 // 認証状態
-const user = ref(null)
+// const user = ref(null)
+// どのコンポーネントでも
+const { user } = useAuth()
 
 // プロフィール編集用の状態
 const userName = ref('')
@@ -43,6 +48,11 @@ const loadProfile = async () => {
     comment.value = data.comment || ''
   }
 }
+
+// const { data: profileData } = useFirebaseData('profile', {
+//   userName: '',
+//   gender: ''
+// })
 
 // プロフィールデータを保存
 const saveProfile = async () => {
