@@ -1,5 +1,5 @@
 <script setup>
-//やりたいこと
+// 出来たこと
 // コードの理解、色塗りページの追加　
 // firebase認証、firestoreによるデータ保存
 // ホーム画面を作成することで、各ページに遷移できるようにするかつ、リンクとして機能させる
@@ -8,9 +8,10 @@
 // UIきれいにしたい
 // プロフィール情報を増やす
 // それぞれのページごとにファイルを独立させる
-
-
 // 塗り絵を、任意の画像でできるようにする(canvas)
+
+
+// やりたいこと
 // バックエンド（サーバ側）をさわる
 // ログイン時メールアドレスの本人確認
 // LINEログイン認証
@@ -21,15 +22,11 @@
 
 import { ref } from 'vue'
 import emailjs from '@emailjs/browser'
-// import ButtonCounter from './components/ButtonCounter.vue'
 import Coloring from './views/Coloring.vue'
 import Counter from './views/Counter.vue'
 import Memo from './views/Memo.vue'
 import Profile from './views/Profile.vue'
-// import SelectColor from './SelectColor.vue'
 import { useRouter, useRoute } from 'vue-router'
-
-
 
 import { auth, db } from './firebase.js'
 import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth'
@@ -96,12 +93,9 @@ const loadUserName = async () => {
 }
 
 
-
 // ページ切替
 const router = useRouter()
 const route = useRoute()
-
-
 
 const goHome = () => router.push('/')
 const goCounter = () => router.push('/counter')
@@ -136,7 +130,6 @@ const goProfile = () => router.push('/profile')
       <h1>カウンタ・メモ・色塗りができます</h1>
     </div>
 
-
     <!-- カウンターページ -->
     <div v-else-if="route.path === '/counter'">
       <Counter />
@@ -149,10 +142,8 @@ const goProfile = () => router.push('/profile')
       <div class="underline"></div>
     </div>
 
-
     <!-- 色塗りページ -->
     <div v-else-if="route.path === '/coloring'">
-     
       <Coloring />
       <div class="underline"></div>
     </div>
@@ -170,8 +161,6 @@ const goProfile = () => router.push('/profile')
       <button @click="goColoring" title="色塗り">🎨</button>
       <button @click="goProfile" title="プロフィール">👤</button>
     </div>
-
-
 
   </div>
 </template>

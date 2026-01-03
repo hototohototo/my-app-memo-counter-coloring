@@ -1,5 +1,15 @@
  <script setup>
+// 出来たこと
+// アップロード時に初期化
+// 塗り絵画像スマホに保存
+// 画面拡大
+// すでに塗られてるところの色を取得
+
 //やりたいこと
+// 過去の塗り絵データをページ内に保存して、一覧表示できるようにする
+
+
+
 import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { useAuth } from '../composables/useAuth.js'
 import { useFirebaseData } from '../composables/useFirebaseData'
@@ -61,6 +71,7 @@ const loadImage = (event) => {
       ctx.value.drawImage(img, 0, 0)
       // Data URL を保存（Firebase に保存可能）
       coloringData.value.file = dataUrl
+      coloringData.value.coloredData = null  // 古い塗りつぶしをクリア
       console.log('画像を読み込みました:', img.width, 'x', img.height)
     }
     img.src = dataUrl
@@ -243,6 +254,15 @@ onUnmounted(() => {
   window.removeEventListener('keydown', handleKeydown)
 })
 
+// 画像をデバイスに保存
+const saveToDevice = () => {
+  if (!canvas.value) return
+  const link = document.createElement('a')
+  link.download = 'coloring_image.png'
+  link.href = canvas.value.toDataURL('image/png')
+  link.click()
+}
+
 </script>
 
 <template>
@@ -279,6 +299,7 @@ onUnmounted(() => {
       <button @click="resetCanvas">リセット</button>
       <button @click="undo">一つ戻る</button>
     </div>
+    <button @click="saveToDevice">保存</button>
   </div>
 </template>
 

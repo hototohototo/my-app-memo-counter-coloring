@@ -1,5 +1,7 @@
  <script setup>
 //やりたいこと
+// カウント対象を追加するボタンを作成して、任意の数のカウンターを追加できるようにする
+
 
 import { watch } from 'vue'
 import ButtonCounter from '../components/ButtonCounter.vue'
@@ -34,14 +36,10 @@ watch(counterData, () => autoSave(), { deep: true })
 
     <!-- カウンターページ -->
       <h1>カウンター</h1>
-      <!-- <ButtonCounter v-model="counterData.counterBig" label="大" @update:modelValue="autoSave()" />
-      <ButtonCounter v-model="counterData.counterMid" label="中" @update:modelValue="autoSave()" /> -->
       <ButtonCounter v-model="counterData.counterBig" label="大" />
       <ButtonCounter v-model="counterData.counterMid" label="中" />
       <p>大 = {{ counterData.counterBig }}, 中 = {{ counterData.counterMid }}</p>
       <button @click="resetAll" class="counter-reset">カウンターリセット</button>
-      <!-- <button @click="saveData">データセーブ</button> -->
-     
 
 </template>
 
@@ -58,51 +56,3 @@ watch(counterData, () => autoSave(), { deep: true })
   background-color: #d32f2f; /* ホバー時に少し濃く */
 }
 </style>
-
-
-
-<!-- src/views/Counter.vue -->
-<!-- <script setup>
-import { watch } from 'vue'
-import ButtonCounter from '../components/ButtonCounter.vue'
-import { useFirebaseData } from '../composables/useFirebaseData'
-
-// カウンターデータを独立管理
-const { data: counterData, loading, autoSave } = useFirebaseData('counterData', {
-  counterBig: 0,
-  counterMid: 0
-})
-
-// 自動保存
-watch(counterData, () => autoSave(), { deep: true })
-
-const resetAll = () => {
-  counterData.value.counterBig = 0
-  counterData.value.counterMid = 0
-  alert('カウンターをリセットしました')
-}
-</script>
-
-<template>
-  <div v-if="loading">読み込み中...</div>
-  <div v-else>
-    <h1>カウンター</h1>
-    <ButtonCounter v-model="counterData.counterBig" label="大" />
-    <ButtonCounter v-model="counterData.counterMid" label="中" />
-    <p>大 = {{ counterData.counterBig }}, 中 = {{ counterData.counterMid }}</p>
-    <button @click="resetAll" class="counter-reset">カウンターリセット</button>
-  </div>
-</template>
-
-<style scoped>
-.counter-reset {
-  background-color: #3515d7;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  padding: 10px 20px;
-}
-.counter-reset:hover {
-  background-color: #d32f2f;
-}
-</style> -->

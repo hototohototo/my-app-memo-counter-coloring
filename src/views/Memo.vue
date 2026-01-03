@@ -1,7 +1,9 @@
 <script setup>
 //やりたいこと
+// 複数のユーザーと同時編集
+// タブを任意の数追加して、各タブで独立したメモを保存・編集できるようにする
 
-// console.log('🔴🔴🔴 Memo.vue が読み込まれました 🔴🔴🔴')
+
 
 import { ref, watch } from 'vue'
 import { useAuth } from '../composables/useAuth.js'
@@ -16,8 +18,6 @@ const { user } = useAuth()
 const { data: memoData, loading, saveData, autoSave} = useFirebaseData('memoData', {
   memoText1: ''
 })
-
-// console.log('🟢🟢🟢 Memo.vue: memoData initialized', memoData.value, '🟢🟢🟢')
 
 const sendingEmail = ref(false)
 const userName = ref('')
@@ -82,14 +82,10 @@ const sendMemoEmail = async () => {
 
 
 watch(memoData, () => {
-  // console.log('🔵🔵🔵 Memo.vue: watch triggered, memoText1 =', memoData.value.memoText1, '🔵🔵🔵')
-  // console.log('🔵🔵🔵 Memo.vue: calling autoSave() 🔵🔵🔵')
   autoSave()
 }, { deep: true })
 
-
 </script>
-
 
 
 <template>
