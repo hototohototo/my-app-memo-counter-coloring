@@ -1,4 +1,6 @@
 <script setup>
+// console.log('🟡🟡🟡 App.vue が読み込まれました（新しいバージョン）🟡🟡🟡')
+
 //やりたいこと
 // コードの理解、色塗りページの追加　
 // firebase認証、firestoreによるデータ保存
@@ -25,7 +27,9 @@
 import { ref } from 'vue'
 import emailjs from '@emailjs/browser'
 // import ButtonCounter from './components/ButtonCounter.vue'
+import Coloring from './views/Coloring.vue'
 import Counter from './views/Counter.vue'
+import Memo from './views/Memo.vue'
 import Profile from './views/Profile.vue'
 // import SelectColor from './SelectColor.vue'
 import { useRouter, useRoute } from 'vue-router'
@@ -84,45 +88,45 @@ onAuthStateChanged(auth, (currentUser) => {
 })
 
 // 保存
-const saveData = async () => {
-  if (!user.value) {
-    console.log('saveData: no user')
-    return
-  }
-  const path = `users/${user.value.uid}/appData`
-  try {
-    await set(dbRef(db, path), {
-      // counterBig: counterBig.value,
-      // counterMid: counterMid.value,
-      memoText: memoText.value,
-      counterBig2: counterBig2.value,
-      counterMid2: counterMid2.value,
-      window1Color: window1Color.value,
-      window2Color: window2Color.value
-    })
-    console.log('saveData: saved', path)
-  } catch (e) {
-    console.error('saveData error:', e)
-    alert('保存に失敗しました: ' + (e.message || e))
-  }
-}
+// const saveData = async () => {
+//   if (!user.value) {
+//     console.log('saveData: no user')
+//     return
+//   }
+//   const path = `users/${user.value.uid}/appData`
+//   try {
+//     await set(dbRef(db, path), {
+//       // counterBig: counterBig.value,
+//       // counterMid: counterMid.value,
+//       // memoText: memoText.value,
+//       // counterBig2: counterBig2.value,
+//       // counterMid2: counterMid2.value,
+//       // window1Color: window1Color.value,
+//       // window2Color: window2Color.value
+//     })
+//     console.log('saveData: saved', path)
+//   } catch (e) {
+//     console.error('saveData error:', e)
+//     alert('保存に失敗しました: ' + (e.message || e))
+//   }
+// }
 // 読み込み
-const loadData = async () => {
-  if (!user.value) return
-  const path = `users/${user.value.uid}/appData`
-  const snapshot = await get(dbRef(db, path))
-  if (snapshot.exists()) {
-    const data = snapshot.val()
-    // counterBig.value = data.counterBig || 0
-    // counterMid.value = data.counterMid || 0
-    counterBig2.value = data.counterBig2 || 0
-    counterMid2.value = data.counterMid2 || 0
-    memoText.value = data.memoText || ''
-    window1Color.value = data.window1Color || 'white'
-    window2Color.value = data.window2Color || 'white'
-    console.log('loadData: loaded', data)
-  }
-}
+// const loadData = async () => {
+//   if (!user.value) return
+//   const path = `users/${user.value.uid}/appData`
+//   const snapshot = await get(dbRef(db, path))
+//   if (snapshot.exists()) {
+//     const data = snapshot.val()
+//     // counterBig.value = data.counterBig || 0
+//     // counterMid.value = data.counterMid || 0
+//     // counterBig2.value = data.counterBig2 || 0
+//     // counterMid2.value = data.counterMid2 || 0
+//     // memoText.value = data.memoText || ''
+//     window1Color.value = data.window1Color || 'white'
+//     window2Color.value = data.window2Color || 'white'
+//     console.log('loadData: loaded', data)
+//   }
+// }
 
 // ユーザー名読み込み
 // ログイン時または必要なタイミングで Profile データを読み込む
@@ -139,15 +143,15 @@ const loadUserName = async () => {
 // const counterBig = ref(0)
 // const counterMid = ref(0)
 
-const counterBig2 = ref(0)
-const counterMid2 = ref(0)
+// const counterBig2 = ref(0)
+// const counterMid2 = ref(0)
 
-const memoText = ref('')
-const sendingEmail = ref(false)
+// const memoText = ref('')
+// const sendingEmail = ref(false)
 
-const selectedColor = ref(0)
-const window1Color = ref('white')
-const window2Color = ref('white')
+// const selectedColor = ref(0)
+// const window1Color = ref('white')
+// const window2Color = ref('white')
 
 // const resetAll = () => {
 //   counterBig.value = 0
@@ -158,69 +162,69 @@ const window2Color = ref('white')
 // }
 
 
-const paintWindow1 = () => {
-  if (selectedColor.value === 1) window1Color.value = 'red'//'#d32f2f'
-  else if (selectedColor.value === 2) window1Color.value = 'blue'//'#3515d7'
-  // saveData()
-}
+// const paintWindow1 = () => {
+//   if (selectedColor.value === 1) window1Color.value = 'red'//'#d32f2f'
+//   else if (selectedColor.value === 2) window1Color.value = 'blue'//'#3515d7'
+//   // saveData()
+// }
 
-const paintWindow2 = () => {
-  if (selectedColor.value === 1) window2Color.value = 'red'//'#d32f2f'
-  else if (selectedColor.value === 2) window2Color.value = 'blue'//'#3515d7'
-  // saveData()
-}
+// const paintWindow2 = () => {
+//   if (selectedColor.value === 1) window2Color.value = 'red'//'#d32f2f'
+//   else if (selectedColor.value === 2) window2Color.value = 'blue'//'#3515d7'
+//   // saveData()
+// }
 
-const resetWindows = () => {
-  window1Color.value = 'white'
-  window2Color.value = 'white'
-  alert('ウィンドウをリセットしました')
-}
+// const resetWindows = () => {
+//   window1Color.value = 'white'
+//   window2Color.value = 'white'
+//   alert('ウィンドウをリセットしました')
+// }
 
 // メモをログイン中のユーザー宛にメール送信
-const emailServiceId = import.meta.env.VITE_EMAILJS_SERVICE_ID
-const emailTemplateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID
-const emailPublicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+// const emailServiceId = import.meta.env.VITE_EMAILJS_SERVICE_ID
+// const emailTemplateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID
+// const emailPublicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY
 
-const sendMemoEmail = async () => {
-  if (!user.value) {
-    alert('ログインしてください')
-    return
-  }
-  if (!memoText.value.trim()) {
-    alert('メモが空です')
-    return
-  }
-  if (!emailServiceId || !emailTemplateId || !emailPublicKey) {
-    alert('メール送信の設定が不足しています。VITE_EMAILJS_SERVICE_ID / VITE_EMAILJS_TEMPLATE_ID / VITE_EMAILJS_PUBLIC_KEY を設定してください。')
-    return
-  }
+// const sendMemoEmail = async () => {
+//   if (!user.value) {
+//     alert('ログインしてください')
+//     return
+//   }
+//   if (!memoText.value.trim()) {
+//     alert('メモが空です')
+//     return
+//   }
+//   if (!emailServiceId || !emailTemplateId || !emailPublicKey) {
+//     alert('メール送信の設定が不足しています。VITE_EMAILJS_SERVICE_ID / VITE_EMAILJS_TEMPLATE_ID / VITE_EMAILJS_PUBLIC_KEY を設定してください。')
+//     return
+//   }
 
-  sendingEmail.value = true
+//   sendingEmail.value = true
 
-  try {
-    await loadUserName() // 最新データを読み込む
-    const sendTime = new Date().toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' }) // 送信時刻（日本時間）
-    await emailjs.send(
-      emailServiceId,
-      emailTemplateId,
-      {
-        userName: userName.value || 'ユーザー',
-        to_email: user.value.email,
-        memo_text: memoText.value,
-        from_email: user.value.email,
-        send_time: sendTime
-      },
-      { publicKey: emailPublicKey }
-    )
+//   try {
+//     await loadUserName() // 最新データを読み込む
+//     const sendTime = new Date().toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' }) // 送信時刻（日本時間）
+//     await emailjs.send(
+//       emailServiceId,
+//       emailTemplateId,
+//       {
+//         userName: userName.value || 'ユーザー',
+//         to_email: user.value.email,
+//         memo_text: memoText.value,
+//         from_email: user.value.email,
+//         send_time: sendTime
+//       },
+//       { publicKey: emailPublicKey }
+//     )
     
-    alert('メモをメールで送信しました')
-  } catch (e) {
-    console.error('メール送信エラー:', e)
-    alert('メール送信に失敗しました: ' + (e.text || e.message || e))
-  } finally {
-    sendingEmail.value = false
-  }
-}
+//     alert('メモをメールで送信しました')
+//   } catch (e) {
+//     console.error('メール送信エラー:', e)
+//     alert('メール送信に失敗しました: ' + (e.text || e.message || e))
+//   } finally {
+//     sendingEmail.value = false
+//   }
+// }
 
 // ページ切替
 const router = useRouter()
@@ -234,14 +238,14 @@ const goCounter = () => router.push('/counter')
 const goMemo = () => router.push('/memo')
 const goColoring = () => router.push('/coloring')
 const goProfile = () => router.push('/profile')
-const red = () => selectedColor.value = 1
-const blue = () => selectedColor.value = 2
+// const red = () => selectedColor.value = 1
+// const blue = () => selectedColor.value = 2
 
-let timer
-watch([memoText, window1Color, window2Color], () => {
-  clearTimeout(timer)
-  timer = setTimeout(() => saveData(), 500)
-})
+// let timer
+// watch([window1Color, window2Color], () => {
+//   clearTimeout(timer)
+//   timer = setTimeout(() => saveData(), 500)
+// })
 
 </script>
 
@@ -294,21 +298,14 @@ watch([memoText, window1Color, window2Color], () => {
 
     <!-- メモページ -->
     <div v-else-if="route.path === '/memo'">
-      <h1>メモ帳</h1>
-      <textarea v-model="memoText" @input="saveData" placeholder="メモを書いてください" rows="10" cols="30"></textarea>
-      <!-- <p>メモ内容: {{ memoText }}</p> -->
-      <p>※メモ内容は自動保存されます</p>
-      
-      <button @click="sendMemoEmail" :disabled="sendingEmail" class="send-email-button">
-        {{ sendingEmail ? '送信中...' : 'メモをメールで送信' }}
-      </button>
+      <Memo />
       <div class="underline"></div>
     </div>
 
 
     <!-- 色塗りページ -->
     <div v-else-if="route.path === '/coloring'">
-      <h1>色塗り</h1>
+      <!-- <h1>色塗り</h1>
       <button @click="red" label="赤" class="coloring-select-red">赤</button>
       <button @click="blue" label="青" class="coloring-select-blue">青</button>
       <p>選択中の色: {{ selectedColor === 1 ? '赤' : selectedColor === 2 ? '青' : 'なし' }}</p>
@@ -320,9 +317,9 @@ watch([memoText, window1Color, window2Color], () => {
       </div>
       <div class="color-window" :style="{ backgroundColor: window2Color }" @click="paintWindow2">
         ウィンドウ2 (クリックして塗る)
-      </div>
+      </div> -->
+      <Coloring />
       <div class="underline"></div>
-    </div>
     </div>
 
     <!-- プロフィールページ -->
@@ -411,11 +408,12 @@ watch([memoText, window1Color, window2Color], () => {
   text-align: center;
   margin-top: 50px;
 }
-textarea {
+
+/* textarea {
   margin-top: 10px;
   font-size: 16px;
   padding: 10px;
-}
+} */
 
 /* .counter-reset {
   background-color: #3515d7; /* 赤色 */
@@ -429,38 +427,38 @@ textarea {
 /* }  */ 
 
 
-.coloring-select-red {
+/* .coloring-select-red {
   background-color: #d32f2f; /* 赤色 */
-  color: white;               /* 文字色を白に */
-  border: none;
+  /* color: white;               文字色を白に */
+  /* border: none;
   border-radius: 5px;
   margin: 4px;
   padding: 20px 30px;
 }
-.coloring-select-red:hover {
-  color: black; /* ホバー時に文字色を黒に */
-}
+.coloring-select-red:hover { */
+  /* color: black; ホバー時に文字色を黒に */
+/* }  */
 
-.coloring-select-blue {
-  background-color: #3515d7; /* 赤色 */
-  color: white;               /* 文字色を白に */
-  border: none;
+/* .coloring-select-blue { */
+  /* background-color: #3515d7; 赤色 */
+  /* color: white;               文字色を白に */
+  /* border: none;
   border-radius: 5px;
   margin: 4px;
   padding: 20px 30px;
-}
-.coloring-select-blue:hover {
-  color: black; /* ホバー時に文字色を黒に */
-}
+} */
+/* .coloring-select-blue:hover { */
+  /* color: black; ホバー時に文字色を黒に */
+/* } */
 
 
-.windows {
-  display: flex;
+/* .windows {
+  display: flex; */
   /* margin-bottom: 400px; */
-  justify-content: center;
+  /* justify-content: center;
   gap: 20px;
-}
-.color-window {
+} */
+/* .color-window {
   width: 200px;
   height: 200px;
   border: 2px solid #000;
@@ -470,29 +468,29 @@ textarea {
   font-size: 14px;
   cursor: pointer;
   color: black;
-}
+} */
 
 .underline {
   margin-top: 400px; /* ナビゲーションバー分の余白を確保 */
 }
 
-.send-email-button {
+/* .send-email-button {
   margin-top: 0px;
   padding: 10px 8px;
   font-size: 15px;
   background-color: #4CAF50;
   color: white;
   /* border: none; */
-  border-radius: 10px;
-  width: 160px;           /* ← 幅を指定 */
-  height: 45px;           /* ← 高さを指定 */
-  font-size: 15px;      /* ← フォントサイズを指定 */
-  cursor: pointer;
-}
+  /* border-radius: 10px; */
+  /* width: 160px;           ← 幅を指定 */
+  /* height: 45px;           ← 高さを指定 */
+  /* font-size: 15px;      ← フォントサイズを指定 */
+  /* cursor: pointer;
+} */
 
-.send-email-button:disabled {
+/* .send-email-button:disabled {
   opacity: 0.6;
-  cursor: not-allowed;
-}
+  cursor: not-allowed; */
+/* } */ 
 
 </style>
