@@ -37,13 +37,55 @@ import { watch } from 'vue'
 
 import { createUserWithEmailAndPassword } from 'firebase/auth'
 
+import { OAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult } from 'firebase/auth'
+
+import { useAuth } from './composables/useAuth'
+const { user } = useAuth()
+
+
+// リダイレクト結果を手動で確認
+// import { getRedirectResult } from 'firebase/auth'
+// import { auth } from './firebase.js'
+
+getRedirectResult(auth).then(result => {
+  console.log('リダイレクト結果:', result)
+  if (result) {
+    console.log('ユーザー:', result.user)
+  } else {
+    console.log('リダイレクト結果なし')
+  }
+}).catch(error => {
+  console.error('エラー:', error)
+})
+
+
+// LINEでログイン
+const loginWithLine = async () => {
+  try {
+    const provider = new OAuthProvider('oidc.line')
+    provider.addScope('openid')
+    provider.addScope('profile')
+    provider.addScope('email') // 取得できない場合もあるのでUIはemail必須にしないこと
+    await signInWithRedirect(auth, provider) // モバイル向けはRedirectが安定
+    // デスクトップ中心なら:
+    // await signInWithPopup(auth, provider)
+  } catch (e) {
+    alert('LINEログイン失敗: ' + e.message)
+  }
+}
+
+// リダイレクト結果の処理（必要ならマウント時に呼ぶ）
+getRedirectResult(auth).catch(e => {
+  console.warn('LINE redirect結果エラー', e)
+})
+
 // ユーザー新規登録
 const signup = async () => {
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email.value, password.value)
     console.log('signup success', userCredential.user.uid)
     // 必要なら初期データを作成
-    await saveData()
+    // await saveData()
   } catch (error) {
     alert('ユーザー作成失敗: ' + error.message)
   }
@@ -51,7 +93,7 @@ const signup = async () => {
 
 
 // 認証状態
-const user = ref(null)
+// const user = ref(null)
 const email = ref('')
 const password = ref('')
 const userName = ref('')
@@ -71,13 +113,13 @@ const logout = () => {
 }
 
 // 認証状態監視
-onAuthStateChanged(auth, (currentUser) => {
-  user.value = currentUser
-  if (currentUser) {
-    loadData()  // ログインしたらデータを読み込む
-    loadUserName()
-  }
-})
+// onAuthStateChanged(auth, (currentUser) => {
+//   user.value = currentUser
+//   if (currentUser) {
+//     loadData()  // ログインしたらデータを読み込む
+//     loadUserName()
+//   }
+// })
 
 
 
@@ -103,7 +145,10 @@ const goMemo = () => router.push('/memo')
 const goColoring = () => router.push('/coloring')
 const goProfile = () => router.push('/profile')
 
-
+// loadUserName は残す
+watch(user, (newUser) => {
+  if (newUser) loadUserName()
+}, { immediate: true })
 </script>
 
 <!-- /////////////////////////////////////////////////////////////////////////// -->
@@ -117,6 +162,7 @@ const goProfile = () => router.push('/profile')
     <input v-model="password" type="password" placeholder="パスワード" />
     <button @click="login">ログイン</button>
     <button @click="signup">新規登録</button>
+    <button @click="loginWithLine">LINEでログイン</button>
   </div>
   <!-- メインアプリ -->
   <div v-else>
