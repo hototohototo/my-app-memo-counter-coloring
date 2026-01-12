@@ -19,6 +19,11 @@ export default async function handler(req, res) {
     return res.status(200).end()
   }
 
+  // Debug: check env presence without exposing secrets
+  if (req.method === 'GET') {
+    return res.status(200).json({ ok: true, hasToken: Boolean(process.env.LINE_CHANNEL_ACCESS_TOKEN) })
+  }
+
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
   }
