@@ -111,10 +111,8 @@ const sendToLine = async () => {
     })
 
     console.log('レスポンスステータス:', response.status)
-    console.log('レスポンステキスト:', await response.text())
-
-    // テキストを再度取得（既に読み込まれているので）
-    const responseText = await response.clone().text()
+    const responseText = await response.text()
+    console.log('レスポンスボディ:', responseText)
     let result = {}
     try {
       result = JSON.parse(responseText)
