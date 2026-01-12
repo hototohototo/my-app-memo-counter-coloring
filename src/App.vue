@@ -55,15 +55,25 @@ const loginWithGoogle = async () => {
 
 // LINEでログイン
 const loginWithLine = async () => {
+  console.log('=== LINEログイン開始 ===')
   try {
     const provider = new OAuthProvider('oidc.line')
     provider.addScope('openid')
     provider.addScope('profile')
     provider.addScope('email') // 取得できない場合もあるのでUIはemail必須にしないこと
+    console.log('LINEプロバイダー設定完了:', provider)
+    console.log('リダイレクト開始...')
     await signInWithRedirect(auth, provider) // モバイル向けはRedirectが安定
+    console.log('リダイレクト完了（このログは通常表示されない）')
     // デスクトップ中心なら:
     // await signInWithPopup(auth, provider)
   } catch (e) {
+    console.error('LINEログインエラー詳細:', {
+      message: e.message,
+      code: e.code,
+      stack: e.stack,
+      fullError: e
+    })
     alert('LINEログイン失敗: ' + e.message)
   }
 }
@@ -73,20 +83,45 @@ const lineRedirectError = ref('')
 
 // リダイレクト結果の処理（マウント時に1回実行）
 const handleLineRedirect = async () => {
+  console.log('=== リダイレクト結果チェック開始 ===')
+  console.log('現在のURL:', window.location.href)
+  console.log('URLパラメータ:', window.location.search)
   lineRedirectProcessing.value = true
   lineRedirectError.value = ''
   try {
+    console.log('getRedirectResult呼び出し...')
     const result = await getRedirectResult(auth)
     console.log('LINE redirect result:', result)
-    if (result && result.user) {
-      // user は useAuth の onAuthStateChanged で自動反映される
-      console.log('LINE user:', result.user.uid)
+    
+    if (result) {
+      console.log('リダイレクト結果あり:', {
+        userUID: result.user?.uid,
+        email: result.user?.email,
+        providerId: result.providerId,
+        operationType: result.operationType
+      })
+      if (result.user) {
+        console.log('LINE user:', result.user.uid)
+        console.log('ユーザー詳細:', {
+          displayName: result.user.displayName,
+          photoURL: result.user.photoURL,
+          email: result.user.email
+        })
+      }
+    } else {
+      console.log('リダイレクト結果なし（通常アクセスまたはリダイレクト未完了）')
     }
   } catch (e) {
-    console.warn('LINE redirect結果エラー', e)
+    console.error('LINE redirect結果エラー詳細:', {
+      message: e.message,
+      code: e.code,
+      stack: e.stack,
+      fullError: e
+    })
     lineRedirectError.value = e.message || String(e)
   } finally {
     lineRedirectProcessing.value = false
+    console.log('=== リダイレクト結果チェック完了 ===')
   }
 }
 
