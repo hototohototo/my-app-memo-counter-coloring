@@ -226,7 +226,7 @@ watch(user, (newUser) => {
   <div class="page">
     <!-- ホーム画面のページ -->
     <div v-if="route.path === '/home' || route.path === '/'">
-      <h1>カウンタ・メモ・色塗りができます</h1>
+      <h1>カウンタ・メモ・色塗りができますよ</h1>
     </div>
 
     <!-- カウンターページ -->
