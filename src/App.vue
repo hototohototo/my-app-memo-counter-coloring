@@ -20,7 +20,7 @@
 // デプロイ先URL
 // https://my-app-memo-counter-coloring.vercel.app/
 
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import emailjs from '@emailjs/browser'
 import Coloring from './views/Coloring.vue'
 import Counter from './views/Counter.vue'
@@ -37,27 +37,21 @@ import { watch } from 'vue'
 
 import { createUserWithEmailAndPassword } from 'firebase/auth'
 
-import { OAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult } from 'firebase/auth'
+import { OAuthProvider, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult } from 'firebase/auth'
 
 import { useAuth } from './composables/useAuth'
 const { user } = useAuth()
 
 
-// リダイレクト結果を手動で確認
-// import { getRedirectResult } from 'firebase/auth'
-// import { auth } from './firebase.js'
-
-getRedirectResult(auth).then(result => {
-  console.log('リダイレクト結果:', result)
-  if (result) {
-    console.log('ユーザー:', result.user)
-  } else {
-    console.log('リダイレクト結果なし')
+// Googleでログイン
+const loginWithGoogle = async () => {
+  try {
+    const provider = new GoogleAuthProvider()
+    await signInWithPopup(auth, provider)
+  } catch (e) {
+    alert('Googleログイン失敗: ' + e.message)
   }
-}).catch(error => {
-  console.error('エラー:', error)
-})
-
+}
 
 // LINEでログイン
 const loginWithLine = async () => {
@@ -74,9 +68,30 @@ const loginWithLine = async () => {
   }
 }
 
-// リダイレクト結果の処理（必要ならマウント時に呼ぶ）
-getRedirectResult(auth).catch(e => {
-  console.warn('LINE redirect結果エラー', e)
+const lineRedirectProcessing = ref(false)
+const lineRedirectError = ref('')
+
+// リダイレクト結果の処理（マウント時に1回実行）
+const handleLineRedirect = async () => {
+  lineRedirectProcessing.value = true
+  lineRedirectError.value = ''
+  try {
+    const result = await getRedirectResult(auth)
+    console.log('LINE redirect result:', result)
+    if (result && result.user) {
+      // user は useAuth の onAuthStateChanged で自動反映される
+      console.log('LINE user:', result.user.uid)
+    }
+  } catch (e) {
+    console.warn('LINE redirect結果エラー', e)
+    lineRedirectError.value = e.message || String(e)
+  } finally {
+    lineRedirectProcessing.value = false
+  }
+}
+
+onMounted(() => {
+  handleLineRedirect()
 })
 
 // ユーザー新規登録
@@ -162,7 +177,10 @@ watch(user, (newUser) => {
     <input v-model="password" type="password" placeholder="パスワード" />
     <button @click="login">ログイン</button>
     <button @click="signup">新規登録</button>
+    <button @click="loginWithGoogle" style="background: #4285f4; color: white;">Googleでログイン</button>
     <button @click="loginWithLine">LINEでログイン</button>
+    <p v-if="lineRedirectProcessing" style="color:#555;">LINEログイン処理中...</p>
+    <p v-if="lineRedirectError" style="color:red;">LINEログインエラー: {{ lineRedirectError }}</p>
   </div>
   <!-- メインアプリ -->
   <div v-else>
