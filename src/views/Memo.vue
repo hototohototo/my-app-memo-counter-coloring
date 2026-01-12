@@ -3,8 +3,6 @@
 // 複数のユーザーと同時編集
 // タブを任意の数追加して、各タブで独立したメモを保存・編集できるようにする
 
-
-
 import { ref, watch } from 'vue'
 import { useAuth } from '../composables/useAuth.js'
 import { useFirebaseData } from '../composables/useFirebaseData'
@@ -37,14 +35,12 @@ const loadUserName = async () => {
   }
 }
 
-
-
 const sendMemoEmail = async () => {
   if (!user.value) {
     alert('ログインしてください')
     return
   }
-  if (!memoData.memoText1.trim()) {
+  if (!memoData.value.memoText1.trim()) {
     alert('メモが空です')
     return
   }
@@ -64,7 +60,7 @@ const sendMemoEmail = async () => {
       {
         userName: userName.value || 'ユーザー',
         to_email: user.value.email,
-        memo_text: memoData.memoText1,
+        memo_text: memoData.value.memoText1,
         from_email: user.value.email,
         send_time: sendTime
       },
@@ -80,6 +76,71 @@ const sendMemoEmail = async () => {
   }
 }
 
+// LINE Messaging API 送信
+const lineUserId = ref('')
+const sendingLine = ref(false)
+
+const sendToLine = async () => {
+  console.log('送信開始: user =', user.value, ', lineUserId =', lineUserId.value, ', memoText1 =', memoData.value.memoText1)
+
+  if (!user.value) {
+    alert('ログインしてください')
+    return
+  }
+  if (!memoData.value.memoText1?.trim()) {
+    alert('メモが空です')
+    console.log('メモ内容:', memoData.value.memoText1) // デバッグ用ログ
+    return
+  }
+  if (!lineUserId.value || !lineUserId.value.trim()) {
+    alert('LINE User ID を入力してください')
+    return
+  }
+
+  sendingLine.value = true
+
+  try {
+    const response = await fetch('/api/send-memo', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        uid: user.value.uid,
+        memoText: memoData.value.memoText1,
+        lineUserId: lineUserId.value
+      })
+    })
+
+    console.log('レスポンスステータス:', response.status)
+    console.log('レスポンステキスト:', await response.text())
+
+    // テキストを再度取得（既に読み込まれているので）
+    const responseText = await response.clone().text()
+    let result = {}
+    try {
+      result = JSON.parse(responseText)
+    } catch (parseError) {
+      console.error('JSON パース失敗:', parseError)
+      console.error('レスポンスボディ:', responseText)
+      alert('LINE API からのレスポンスが無効です: ' + responseText)
+      return
+    }
+
+    console.log('APIレスポンス:', result)
+
+    if (!response.ok) {
+      alert('LINE 送信失敗: ' + (result.error || 'エラー'))
+      console.error('LINE送信エラー:', result)
+      return
+    }
+
+    alert('メモを LINE で送信しました')
+  } catch (e) {
+    console.error('LINE 送信エラー:', e)
+    alert('LINE 送信に失敗しました: ' + (e.message || e))
+  } finally {
+    sendingLine.value = false
+  }
+}
 
 watch(memoData, () => {
   autoSave()
@@ -87,44 +148,111 @@ watch(memoData, () => {
 
 </script>
 
-
 <template>
-
-    <!-- メモページ -->
-      <h1>メモ帳</h1>
-      <textarea v-model="memoData.memoText1" placeholder="メモを書いてください" rows="10" cols="30"></textarea>
-      <!-- <p>メモ内容: {{ memoText }}</p> -->
-      <p>※メモ内容は自動保存されます</p>
-      
-      <button @click="sendMemoEmail" :disabled="sendingEmail" class="send-email-button">
-        {{ sendingEmail ? '送信中...' : 'メモをメールで送信' }}
+  <div class="memo-container">
+    <h1>メモ帳</h1>
+    <textarea v-model="memoData.memoText1" placeholder="メモを書いてください" rows="10" cols="30"></textarea>
+    <p>※メモ内容は自動保存されます</p>
+    
+    <button @click="sendMemoEmail" :disabled="sendingEmail" class="send-email-button">
+      {{ sendingEmail ? '送信中...' : 'メモをメールで送信' }}
+    </button>
+    
+    <div class="line-section">
+      <h3>LINE で送信（Messaging API）</h3>
+      <p class="hint">
+        LINE 公式アカウントを友だち追加後、User ID を入力してください
+        <br>
+        <small>※User ID の取得方法は <a href="https://developers.line.biz/ja/docs/messaging-api/getting-user-ids/" target="_blank">こちら</a></small>
+      </p>
+      <input 
+        v-model="lineUserId" 
+        type="text" 
+        placeholder="LINE User ID を入力（例: U1234567890abcdef...）"
+        class="token-input"
+      />
+      <button @click="sendToLine" :disabled="sendingLine || !user" class="send-line-button">
+        {{ sendingLine ? '送信中...' : 'メモをLINEに送信' }}
       </button>
-
+    </div>
+  </div>
 </template>
 
 <style scoped>
+.memo-container {
+  padding: 20px;
+}
 
 textarea {
   margin-top: 10px;
   font-size: 16px;
   padding: 10px;
+  width: 100%;
+  max-width: 500px;
 }
 
 .send-email-button {
-  margin-top: 0px;
-  padding: 10px 8px;
+  margin-top: 10px;
+  padding: 10px 15px;
   font-size: 15px;
   background-color: #4CAF50;
   color: white;
-  /* border: none; */
+  border: none;
   border-radius: 10px;
-  width: 160px;           /* ← 幅を指定 */
-  height: 45px;           /* ← 高さを指定 */
-  font-size: 15px;      /* ← フォントサイズを指定 */
   cursor: pointer;
+  min-width: 160px;
+  height: 45px;
 }
 
 .send-email-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.line-section {
+  margin-top: 30px;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+}
+
+.hint {
+  font-size: 12px;
+  color: #666;
+  margin: 10px 0;
+}
+
+.hint a {
+  color: #06c755;
+  text-decoration: none;
+}
+
+.hint a:hover {
+  text-decoration: underline;
+}
+
+.token-input {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.send-line-button {
+  padding: 10px 15px;
+  font-size: 14px;
+  background-color: #06c755;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.send-line-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
