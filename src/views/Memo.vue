@@ -80,6 +80,29 @@ const sendMemoEmail = async () => {
 const lineUserId = ref('')
 const sendingLine = ref(false)
 
+// LINE User IDをFirebaseから読み込む
+const loadLineUserId = async () => {
+  if (!user.value) return
+  try {
+    const path = `users/${user.value.uid}/lineProfile`
+    const snapshot = await get(dbRef(db, path))
+    if (snapshot.exists()) {
+      const lineProfile = snapshot.val()
+      lineUserId.value = lineProfile.userId
+      console.log('LINE プロフィール情報を読み込みました:', lineProfile)
+    }
+  } catch (e) {
+    console.error('LINE プロフィール読み込みエラー:', e)
+  }
+}
+
+// ログイン時にLINE User IDを読み込む
+watch(user, async (newUser) => {
+  if (newUser) {
+    await loadLineUserId()
+  }
+}, { immediate: true })
+
 const sendToLine = async () => {
   console.log('送信開始: user =', user.value, ', lineUserId =', lineUserId.value, ', memoText1 =', memoData.value.memoText1)
 
@@ -157,18 +180,22 @@ watch(memoData, () => {
     </button>
     
     <div class="line-section">
-      <h3>LINE で送信（Messaging API）</h3>
-      <p class="hint">
-        LINE 公式アカウントを友だち追加後、User ID を入力してください
-        <br>
-        <small>※User ID の取得方法は <a href="https://developers.line.biz/ja/docs/messaging-api/getting-user-ids/" target="_blank">こちら</a></small>
-      </p>
-      <input 
+       <!-- Messaging API  -->
+      <!-- <h3>LINE で送信</h3> -->
+      <!-- <p class="hint"> -->
+        <!-- LINE 公式アカウントを友だち追加後、User ID を入力してください -->
+        <!-- <br> -->
+        <!-- <small>※User ID の取得方法は <a href="https://developers.line.biz/ja/docs/messaging-api/getting-user-ids/" target="_blank">こちら</a></small> -->
+      <!-- </p> -->
+      <!-- <input 
         v-model="lineUserId" 
         type="text" 
         placeholder="LINE User ID を入力（例: U1234567890abcdef...）"
         class="token-input"
-      />
+      /> -->
+      <small>下記QRコードから公式アカウントを友だち追加してください</small>
+      <br>
+      <img src="/image/S_gainfriends_2dbarcodes_GW.png"/>
       <button @click="sendToLine" :disabled="sendingLine || !user" class="send-line-button">
         {{ sendingLine ? '送信中...' : 'メモをLINEに送信' }}
       </button>

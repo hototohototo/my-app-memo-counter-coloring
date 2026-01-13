@@ -9,12 +9,21 @@
 // プロフィール情報を増やす
 // それぞれのページごとにファイルを独立させる
 // 塗り絵を、任意の画像でできるようにする(canvas)
+// LINEログイン
+// googleログイン
+
 
 
 // やりたいこと
 // バックエンド（サーバ側）をさわる
 // ログイン時メールアドレスの本人確認
-// LINEログイン認証
+// LINEとfirebaseのカスタム認証
+// ログインせずに入力してからログインした場合、どっちの情報を引き継ぐか選択できるようににする
+
+
+// できなかったこと
+// ラインログインができなかったのは、リダイレクトで戻ってくる時に
+// ドメインが変わってしまってデータを取ってこれなかったかららしい→修正済み（リダイレクトじゃなくポップアップに変更）
 
 
 // デプロイ先URL
@@ -42,12 +51,30 @@ import { OAuthProvider, GoogleAuthProvider, signInWithPopup, signInWithRedirect,
 import { useAuth } from './composables/useAuth'
 const { user } = useAuth()
 
+// ユーザーIDをFirebaseに保存
+// 初回のみ実行（アカウント作成日時を保存）
+const saveData = async () => {
+  if (!user.value) return
+  try {
+    const path = `users/${user.value.uid}/InitializedDate`
+    const snapshot = await get(dbRef(db, path))
+    if (!snapshot.exists()) {
+      // 初回のみアカウント作成日時を保存
+      const createdAt = new Date().toISOString()
+      await set(dbRef(db, path), { createdAt })
+      console.log('ユーザーIDの箱を作成しました:', user.value.uid, '作成日時:', createdAt)
+    }
+  } catch (e) {
+    console.error('saveData error:', e)
+  }
+}
 
 // Googleでログイン
 const loginWithGoogle = async () => {
   try {
     const provider = new GoogleAuthProvider()
     await signInWithPopup(auth, provider)
+    await saveData()
   } catch (e) {
     alert('Googleログイン失敗: ' + e.message)
   }
@@ -62,9 +89,42 @@ const loginWithLine = async () => {
     provider.addScope('profile')
     provider.addScope('email') // 取得できない場合もあるのでUIはemail必須にしないこと
     console.log('LINEプロバイダー設定完了:', provider)
-    console.log('リダイレクト開始...')
-    await signInWithRedirect(auth, provider) // モバイル向けはRedirectが安定
-    console.log('リダイレクト完了（このログは通常表示されない）')
+    
+    console.log('ポップアップ開始...')
+    const result = await signInWithPopup(auth, provider)
+    console.log('LINEログイン成功:', result.user.uid)
+    
+    // LINE プロフィール情報をFirebaseに保存
+    const credential = OAuthProvider.credentialFromResult(result)
+    const accessToken = credential?.accessToken
+    if (accessToken) {
+      try {
+        const profileResponse = await fetch('https://api.line.me/v2/profile', {
+          headers: { 'Authorization': `Bearer ${accessToken}` }
+        })
+        const profile = await profileResponse.json()
+        if (profile.userId) {
+          // LINEプロフィール情報をFirebaseに保存
+          const path = `users/${result.user.uid}/lineProfile`
+          await set(dbRef(db, path), {
+            userId: profile.userId,
+            displayName: profile.displayName || '',
+            pictureUrl: profile.pictureUrl || '',
+            statusMessage: profile.statusMessage || '',
+          })
+          // 表示用にプロフィール名を保持
+          lineProfileName.value = profile.displayName || ''
+          console.log('LINEプロフィール情報を保存:', profile)
+        }
+      } catch (e) {
+        console.error('LINE プロフィール取得エラー:', e)
+      }
+    }
+    
+    await saveData()
+    
+    // await signInWithRedirect(auth, provider) // モバイル向けはRedirectが安定
+    // console.log('リダイレクト完了（このログは通常表示されない）')
     // デスクトップ中心なら:
     // await signInWithPopup(auth, provider)
   } catch (e) {
@@ -107,6 +167,7 @@ const handleLineRedirect = async () => {
           photoURL: result.user.photoURL,
           email: result.user.email
         })
+        await saveData()
       }
     } else {
       console.log('リダイレクト結果なし（通常アクセスまたはリダイレクト未完了）')
@@ -134,8 +195,8 @@ const signup = async () => {
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email.value, password.value)
     console.log('signup success', userCredential.user.uid)
-    // 必要なら初期データを作成
-    // await saveData()
+    // ユーザーIDの箱を作成
+    await saveData()
   } catch (error) {
     alert('ユーザー作成失敗: ' + error.message)
   }
@@ -147,6 +208,7 @@ const signup = async () => {
 const email = ref('')
 const password = ref('')
 const userName = ref('')
+const lineProfileName = ref('')
 
 // ログイン
 const login = async () => {
@@ -219,7 +281,7 @@ watch(user, (newUser) => {
   </div>
   <!-- メインアプリ -->
   <div v-else>
-    <p>ようこそ、{{ user.email }} さん！ <button @click="logout">ログアウト</button></p>
+    <p>ようこそ、{{ lineProfileName || user.email || userName }} さん！ <button @click="logout">ログアウト</button></p>
   </div>  
 
   <!-- ナビゲーション -->
