@@ -1,7 +1,8 @@
 <script setup>
 //やりたいこと
-// 複数のユーザーと同時編集
+// 複数のユーザーと同時編集、そのための招待機能
 // タブを任意の数追加して、各タブで独立したメモを保存・編集できるようにする
+// ラインやメールでメモを送信する機能に、宛先設定や未設定の場合の表示を追加する
 
 import { ref, watch } from 'vue'
 import { useAuth } from '../composables/useAuth.js'
@@ -193,9 +194,15 @@ watch(memoData, () => {
         placeholder="LINE User ID を入力（例: U1234567890abcdef...）"
         class="token-input"
       /> -->
-      <small>下記QRコードから公式アカウントを友だち追加してください</small>
+      <!-- <small>下記QRコードから公式アカウントを友だち追加してください</small> -->
+      <br>
+      <a href="https://qr-official.line.me/gs/M_182rbcup_GW.png?oat_content=qr" target="_blank" rel="noreferrer noopener">
+        公式アカウント追加用QRを開く
+      </a>
+      <a href="https://lin.ee/XJ4T6SlL"><img src="https://scdn.line-apps.com/n/line_add_friends/btn/ja.png" alt="友だち追加" height="36" border="0"></a>
       <br>
       <img src="/image/S_gainfriends_2dbarcodes_GW.png"/>
+      <br>
       <button @click="sendToLine" :disabled="sendingLine || !user" class="send-line-button">
         {{ sendingLine ? '送信中...' : 'メモをLINEに送信' }}
       </button>
@@ -205,11 +212,13 @@ watch(memoData, () => {
 
 <style scoped>
 .memo-container {
-  padding: 20px;
+  padding: 0px;
+  margin-left: 30px;
+  margin-right: 30px;
 }
 
 textarea {
-  margin-top: 10px;
+  margin-top: 0px;
   font-size: 16px;
   padding: 10px;
   width: 100%;

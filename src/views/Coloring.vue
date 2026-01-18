@@ -7,6 +7,10 @@
 
 //やりたいこと
 // 過去の塗り絵データをページ内に保存して、一覧表示できるようにする
+// 画像処理で画質改善or白黒処理
+// 塗りつぶしの許容範囲を調整できるようにする
+// ドラッグでピンを表示しながら丁寧に塗るモード
+// windowの中だけを拡大して、ピクセル単位まで確認できる、そのためのクリック座標取得仕様の変更
 
 
 
@@ -130,10 +134,10 @@ const floodFill = (x, y, fillColor) => {
   }
   
   // 黒線なら何もしない
-  if (isBlackLine(targetColor)) {
-    console.log('黒線をクリックしました')
-    return
-  }
+  // if (isBlackLine(targetColor)) {
+  //   console.log('黒線をクリックしました')
+  //   return
+  // }
   
   const stack = [[x, y]]
   let paintedPixels = 0
@@ -146,8 +150,8 @@ const floodFill = (x, y, fillColor) => {
     
     const currentColor = getPixelColor(pixels, px, py, canvas.value.width)
     
-    // 対象の色 & 黒線でない場合のみ塗る
-    if (colorsMatch(currentColor, targetColor) && !isBlackLine(currentColor)) {
+    // 対象の色( & 黒線でない場合)のみ塗る
+    if (colorsMatch(currentColor, targetColor)){// && !isBlackLine(currentColor)) {
       const index = (py * canvas.value.width + px) * 4
       pixels[index] = fillColor.r
       pixels[index + 1] = fillColor.g
@@ -184,17 +188,17 @@ const getPixelColor = (pixels, x, y, width) => {
 
 // 2つの色が一致するかチェック
 const colorsMatch = (color1, color2) => {
-  const threshold = 30  // 許容範囲
+  const threshold = 50  // 許容範囲
   return Math.abs(color1.r - color2.r) < threshold &&
          Math.abs(color1.g - color2.g) < threshold &&
          Math.abs(color1.b - color2.b) < threshold
 }
 
 // 黒線かどうかチェック
-const isBlackLine = (color) => {
-  const threshold = 100  // この値以下なら黒線とみなす
-  return color.r < threshold && color.g < threshold && color.b < threshold
-}
+// const isBlackLine = (color) => {
+//   const threshold = 100  // この値以下なら黒線とみなす
+//   return color.r < threshold && color.g < threshold && color.b < threshold
+// }
 
 // 16進数カラーをRGBに変換
 const hexToRgb = (hex) => {
@@ -254,6 +258,48 @@ onUnmounted(() => {
   window.removeEventListener('keydown', handleKeydown)
 })
 
+
+// メディアンフィルタを適用
+const applyMedianFilter = () => {
+  if (!coloringData.value.file) {
+    alert('まず画像をアップロードしてください')
+    return
+  }
+  
+  const imageData = ctx.value.getImageData(0, 0, canvas.value.width, canvas.value.height)
+  const pixels = imageData.data
+  const width = canvas.value.width
+  const height = canvas.value.height
+  
+  // フィルタ後のピクセルデータ
+  const filteredPixels = new Uint8ClampedArray(pixels)
+  
+  // 3x3 メディアンフィルタを適用
+  for (let y = 1; y < height - 1; y++) {
+    for (let x = 1; x < width - 1; x++) {
+      // RGBA それぞれに対してメディアンフィルタを適用
+      for (let channel = 0; channel < 4; channel++) {
+        const values = []
+        for (let dy = -1; dy <= 1; dy++) {
+          for (let dx = -1; dx <= 1; dx++) {
+            const idx = ((y + dy) * width + (x + dx)) * 4 + channel
+            values.push(pixels[idx])
+          }
+        }
+        // 中央値を計算
+        values.sort((a, b) => a - b)
+        const medianIdx = (x + y * width) * 4 + channel
+        filteredPixels[medianIdx] = values[4] // 9個の値の中央値
+      }
+    }
+  }
+  
+  imageData.data.set(filteredPixels)
+  ctx.value.putImageData(imageData, 0, 0)
+  console.log('メディアンフィルタを適用しました')
+}
+
+
 // 画像をデバイスに保存
 const saveToDevice = () => {
   if (!canvas.value) return
@@ -298,6 +344,7 @@ const saveToDevice = () => {
     <div class="actions" v-if="coloringData.file">
       <button @click="resetCanvas">リセット</button>
       <button @click="undo">一つ戻る</button>
+      <button @click="applyMedianFilter" style="background-color: #2196F3">フィルタ適用</button>
     </div>
     <button @click="saveToDevice">保存</button>
   </div>
@@ -307,7 +354,8 @@ const saveToDevice = () => {
 <style scoped>
 .coloring-container {
   text-align: center;
-  padding: 20px;
+  /* padding: 20px; */
+  
 }
 
 .upload-section {

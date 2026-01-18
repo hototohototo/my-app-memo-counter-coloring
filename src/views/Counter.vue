@@ -23,8 +23,8 @@ const { data: counterData, loading, saveData, autoSave} = useFirebaseData('count
 
 // リセット機能
 const resetAll = () => {
-  counterData.counterBig = 0
-  counterData.counterMid = 0
+  counterData.value.counterBig = 0
+  counterData.value.counterMid = 0
   alert('カウンターをリセットしました')
 }
 

@@ -115,6 +115,9 @@ const loginWithLine = async () => {
           // 表示用にプロフィール名を保持
           lineProfileName.value = profile.displayName || ''
           console.log('LINEプロフィール情報を保存:', profile)
+          // 表示用にプロフィール画像URLを保持
+          lineProfileImageUrl.value = profile.pictureUrl || ''
+          console.log('LINEプロフィール画像URLを保持:', lineProfileImageUrl.value)
         }
       } catch (e) {
         console.error('LINE プロフィール取得エラー:', e)
@@ -209,6 +212,7 @@ const email = ref('')
 const password = ref('')
 const userName = ref('')
 const lineProfileName = ref('')
+const lineProfileImageUrl = ref('')
 
 // ログイン
 const login = async () => {
@@ -235,14 +239,21 @@ const logout = () => {
 
 
 
-// ユーザー名読み込み
-// ログイン時または必要なタイミングで Profile データを読み込む
-const loadUserName = async () => {
+// プロフィール・LINEプロフィール一括読み込み（1回のDB取得で反映）
+const loadUserData = async () => {
   if (!user.value) return
-  const path = `users/${user.value.uid}/profile`
+  const path = `users/${user.value.uid}/lineProfile`
   const snapshot = await get(dbRef(db, path))
-  if (snapshot.exists()) {
-    userName.value = snapshot.val().userName || ''
+  if (!snapshot.exists()) return
+  const data = snapshot.val() || {}
+  // プロフィール名
+  if (data.profile && typeof data.profile.userName === 'string') {
+    userName.value = data.profile.userName || ''
+  }
+  // LINEプロフィール
+  if (data.lineProfile) {
+    lineProfileName.value = data.lineProfile.displayName || lineProfileName.value || ''
+    lineProfileImageUrl.value = data.lineProfile.pictureUrl || ''
   }
 }
 
@@ -259,7 +270,9 @@ const goProfile = () => router.push('/profile')
 
 // loadUserName は残す
 watch(user, (newUser) => {
-  if (newUser) loadUserName()
+  if (newUser) {
+    loadUserData()
+  }
 }, { immediate: true })
 </script>
 
@@ -281,7 +294,32 @@ watch(user, (newUser) => {
   </div>
   <!-- メインアプリ -->
   <div v-else>
-    <p>ようこそ、{{ lineProfileName || user.email || userName }} さん！ <button @click="logout">ログアウト</button></p>
+    <div class="user-info">
+      <div class="user-left">
+        <button @click="goHome" class="icon-btn">
+        <img src="/image/ツールボックスアイコン.png"
+          alt="アプリアイコン画像"
+          class="header-icon"
+        />
+        </button>
+        <small>ツールボックス</small>
+        <div class="user-text">
+          <small class="user-name">　　{{ lineProfileName || user.email || userName || "Unknown" }}</small>
+        </div>
+      </div>
+      <div class="user-right">
+        <button @click="goProfile" class="icon-btn">
+        <img
+          v-if="lineProfileImageUrl || user.photoURL"
+          :src="lineProfileImageUrl || user.photoURL"
+          alt="プロフィール画像"
+          class="avatar"
+        />
+        </button>
+        <button class="logout-btn" @click="logout">ログアウト</button>
+      </div>
+    </div>
+
   </div>  
 
   <!-- ナビゲーション -->
@@ -391,9 +429,98 @@ watch(user, (newUser) => {
 
 .page {
   text-align: center;
-  margin-top: 50px;
+  margin-top: 150px;
 } 
 
 .underline {
   margin-top: 400px; /* ナビゲーションバー分の余白を確保 */}
+
+
+.header-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 30%;
+  margin-right: 0px;
+}
+
+.user-info {
+  display: flex;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 2px 1.5%;
+  background-color: #fff;
+  border-bottom: 1px solid #ddd;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+}
+
+.user-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-right {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.user-text {
+  /* margin-left: auto;   右端に寄せる */
+  display: flex;
+  flex-direction: column;
+  line-height: 1.4;
+}
+
+.user-name {
+  margin: 0;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+/* .user-sub {
+  margin: 0;
+  font-size: 10px;
+  color: #666;
+} */
+
+.icon-btn {
+  outline: none;
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.icon-btn:active {
+  opacity: 0.9;         /* わずかに透明に（または何もしない） */
+}
+
+.logout-btn {
+  padding: 3px 10px;
+  font-size: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: #f9f9f9;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.logout-btn:hover {
+  background: #e8e8e8;
+}
 </style>
