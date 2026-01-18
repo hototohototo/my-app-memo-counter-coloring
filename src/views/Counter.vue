@@ -45,9 +45,9 @@ const removeCounter = () => {
 // 初期化
 const sounds = ref({
   // counter: new Audio('/sound-effect/mario-coin-sound-effect.mp3'),
-  reset: new Audio('/public/sound-effect/10-mario-died.mp3'),
-  add: new Audio('/public/sound-effect/1up-sound-Trimmed by FlexClip.mp3'),
-  remove: new Audio('/public/sound-effect/10-mario-died.mp3'),
+  reset: new Audio('/sound-effect/10-mario-died.mp3'),
+  add: new Audio('/sound-effect/1up-sound-Trimmed by FlexClip.mp3'),
+  remove: new Audio('/sound-effect/10-mario-died.mp3'),
 })
 
 const playSound = (type) => {

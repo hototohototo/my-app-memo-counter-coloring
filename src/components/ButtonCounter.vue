@@ -12,11 +12,14 @@ const emit = defineEmits(['update:modelValue'])
 const isHolding = ref(false)
 let holdTimer = null
 let holdStartTime = null
+let isProcessing = false  // 重複処理を防ぐ
 
 const increase = () => emit('update:modelValue', modelValue + 1)
 
 // ポインターダウン時
 const handlePointerDown = () => {
+  if (isProcessing) return  // 処理中なら無視
+  
   isHolding.value = true
   holdStartTime = Date.now()
   
@@ -37,6 +40,8 @@ const handlePointerDown = () => {
 
 // ポインターアップ時
 const handlePointerUp = () => {
+  if (!isHolding.value) return  // まだダウンしていなければ無視
+  
   isHolding.value = false
   
   if (holdTimer) {
@@ -44,11 +49,13 @@ const handlePointerUp = () => {
     clearInterval(holdTimer)
   }
   
-  // 1秒未満 → 通常の +1
+  // 1秒未満 → 通常の +1（1回のみ）
   const pressTime = Date.now() - holdStartTime
   if (pressTime < 1000) {
+    isProcessing = true
     increase()
     playSound('counter')
+    setTimeout(() => { isProcessing = false }, 50)  // 50ms後に再度有効化
   }
   
   holdTimer = null
@@ -89,6 +96,8 @@ button {
   border-radius: 8px;
   cursor: pointer;
   min-width: 120px;
+  user-select: none;  /* 長押し時のテキスト選択を無効化 */
+  -webkit-user-select: none;  /* iOS Safari対応 */
 }
 
 button:active {
