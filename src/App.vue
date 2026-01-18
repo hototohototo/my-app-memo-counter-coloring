@@ -242,7 +242,7 @@ const logout = () => {
 // プロフィール・LINEプロフィール一括読み込み（1回のDB取得で反映）
 const loadUserData = async () => {
   if (!user.value) return
-  const path = `users/${user.value.uid}/lineProfile`
+  const path = `users/${user.value.uid}`
   const snapshot = await get(dbRef(db, path))
   if (!snapshot.exists()) return
   const data = snapshot.val() || {}

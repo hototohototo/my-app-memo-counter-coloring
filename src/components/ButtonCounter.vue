@@ -1,5 +1,5 @@
 <script setup>
-import { defineProps, defineEmits, ref } from 'vue'
+import { defineProps, defineEmits, ref, onMounted } from 'vue'
 // import { watch } from 'vue'
 // watch([counterBig, counterMid, memoText], () => { saveData() })
 
@@ -15,8 +15,8 @@ let holdStartTime = null
 
 const increase = () => emit('update:modelValue', modelValue + 1)
 
-// マウスダウン時
-const handleMouseDown = () => {
+// ポインターダウン時
+const handlePointerDown = () => {
   isHolding.value = true
   holdStartTime = Date.now()
   
@@ -28,17 +28,15 @@ const handleMouseDown = () => {
         return
       }
       emit('update:modelValue', modelValue + 1)
-      // サウンド再生
       playSound('counter')
-    }, 100) // 100ms ごとに +1
+    }, 100)
     
-    // マウスアップ時にインターバルをクリアするため、タイマーIDを保存
     holdTimer = increaseInterval
-  }, 1000) // 1秒待つ
+  }, 1000)
 }
 
-// マウスアップ時
-const handleMouseUp = () => {
+// ポインターアップ時
+const handlePointerUp = () => {
   isHolding.value = false
   
   if (holdTimer) {
@@ -46,24 +44,19 @@ const handleMouseUp = () => {
     clearInterval(holdTimer)
   }
   
-  // 1秒未満のクリック → 通常の +1
+  // 1秒未満 → 通常の +1
   const pressTime = Date.now() - holdStartTime
   if (pressTime < 1000) {
     increase()
-    // サウンド再生
     playSound('counter')
   }
   
   holdTimer = null
 }
 
-const handleMouseLeave = () => {
-  handleMouseUp()
-}
-
 // 初期化
 const sounds = ref({
-  counter: new Audio('/sound-effect/mario-coin-sound-effect.mp3'),
+  counter: new Audio('/public/sound-effect/mario-coin-sound-effect.mp3'),
   // reset: new Audio('/sound-effect/10-mario-died.mp3'),
 })
 
@@ -76,11 +69,9 @@ const playSound = (type) => {
 
 <template>
   <button 
-    @mousedown="handleMouseDown"
-    @mouseup="handleMouseUp"
-    @mouseleave="handleMouseLeave"
-    @touchstart="handleMouseDown"
-    @touchend="handleMouseUp"
+    @pointerdown="handlePointerDown"
+    @pointerup="handlePointerUp"
+    @pointerleave="handlePointerUp"
   >
     {{ label }}: {{ modelValue }}
   </button>
