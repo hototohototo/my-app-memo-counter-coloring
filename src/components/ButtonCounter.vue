@@ -63,7 +63,7 @@ const handlePointerUp = () => {
 
 // 初期化
 const sounds = ref({
-  counter: new Audio('/sound-effect/mario-coin-sound-effect.mp3'),
+  counter: new Audio('/sound-effect/mario-coin-sound-effect-Trimmed by FlexClip.mp3'),
   // reset: new Audio('/sound-effect/10-mario-died.mp3'),
 })
 
