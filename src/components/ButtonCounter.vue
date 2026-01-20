@@ -88,6 +88,7 @@ const playSound = (type) => {
 button {
   padding: 20px 80px;
   font-size: 18px;
+  /* font-size: auto; */
   margin: 30px;
   touch-action: manipulation;
   background-color: #007bff;
