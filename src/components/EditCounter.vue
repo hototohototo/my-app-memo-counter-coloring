@@ -1,4 +1,7 @@
 <script setup>
+// やりたいこと
+// このモードに、削除モード、追加モードを統合する
+
 import { defineProps, defineEmits, ref } from 'vue'
 
 const props = defineProps({
@@ -17,7 +20,7 @@ const counterName = ref('')
       <!-- <p>AddCounter</p> -->
       <p>名前:
        <input v-model="counterName" type="text" placeholder="追加するカウンタの名前を入力" 
-       size="25" style="height: 40px; font-size: 15px; transform: translate(0,-15%);"/>
+       size="20" style="height: 40px; font-size: 15px; transform: translate(0,-15%);"/>
       </p><br/>
       <div class="button-container">
         <button @click="emit('remove')" class="button-right" style="background-color: orange; border-radius: 5px;">削除モード</button>

@@ -1,5 +1,6 @@
 <script setup>
 //やりたいこと
+// カウンタと同様に、データベースに即時反映
 // 複数のユーザーと同時編集、そのための招待機能
 // タブを任意の数追加して、各タブで独立したメモを保存・編集できるようにする
 // ラインやメールでメモを送信する機能に、宛先設定や未設定の場合の表示を追加する
@@ -173,7 +174,13 @@ watch(memoData, () => {
 <template>
   <div class="memo-container">
     <h1>メモ帳</h1>
-    <textarea v-model="memoData.memoText1" placeholder="メモを書いてください" rows="10" cols="30"></textarea>
+    <textarea 
+      v-model="memoData.memoText1" 
+      @input="autoSave"
+      placeholder="メモを書いてください" 
+      rows="10" 
+      cols="30"
+    ></textarea>
     <p>※メモ内容は自動保存されます</p>
     
     <button @click="sendMemoEmail" :disabled="sendingEmail" class="send-email-button">

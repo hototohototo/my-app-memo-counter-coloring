@@ -1,18 +1,23 @@
  <script setup lang="ts">
-//やりたいこと
+// できたこと
 // カウント対象を追加するボタンを作成して、任意の数のカウンターを追加できるようにする
+
+
+//やりたいこと
+// UIを整える
+// 削除モード、追加モードを統合する
 
 
 import { watch, ref, computed } from 'vue'
 import ButtonCounter from '../components/ButtonCounter.vue'
-import AddCounter from '../components/EditCounter.vue'
+import EditCounter from '../components/EditCounter.vue'
 import DeleteCounterMode from '../components/DeleteCounterMode.vue'
 // import { useAuth } from '../composables/useAuth.js'
 import { useFirebaseData } from '../composables/useFirebaseData'
 // import { createUserWithEmailAndPassword } from 'firebase/auth'
 
 // import { Plus, Trash2Icon } from "lucide-vue-next"
-
+import { SquarePen } from "lucide-vue-next"
 
 // // どのコンポーネントでも
 // const { user } = useAuth()
@@ -115,14 +120,15 @@ watch(counterData, () => autoSave(), { deep: true })
       <!-- <button @click="removeCounter" class="remove-btn">
          🚮
       </button> -->
-      
 
       <button @click="editMode" class="add-btn" style="font-size: 30px;">
         <!-- <Plus :size="40" /> -->
-        🖊
+        <SquarePen :size="40" />
+        <!-- <SquarePen class="pi pi-SquarePen" ></SquarePen> -->
+
       </button>
 
-      <AddCounter :show="showAddCounter" @close="showAddCounter = false" 
+      <EditCounter :show="showAddCounter" @close="showAddCounter = false" 
       @add="addCounterWithName" @remove="openDeleteMode"/>
 
       <DeleteCounterMode :show="showDeleteMode" :counterArray="counterArray" 
