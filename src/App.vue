@@ -509,7 +509,7 @@ watch(user, (newUser) => {
 } 
 
 .page-home {
-  background-image: url('image/backgroundImage.webp');
+  background-image: url('/usingImage/backgroundImage.webp');
   background-repeat: repeat;
   background-attachment: fixed;
   background-size: 100% auto;
