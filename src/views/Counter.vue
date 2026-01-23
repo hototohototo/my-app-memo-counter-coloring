@@ -99,7 +99,7 @@ watch(counterData, () => autoSave(), { deep: true })
 <template>
 
     <!-- カウンターページ -->
-      <h1>カウンター</h1>
+      <h1 style="margin: 0px; padding-top: 100px">カウンター</h1>
       <!-- <ButtonCounter v-model="counterData.counterBig" label="大" />
       <ButtonCounter v-model="counterData.counterMid" label="中" /> -->
       <ButtonCounter 

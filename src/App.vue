@@ -30,6 +30,37 @@
 // https://my-app-memo-counter-coloring.vercel.app/
 
 import { ref, onMounted } from 'vue'
+// イントロ動画表示制御
+
+const showIntro = ref(false)
+const showIntroOverlay = ref(false)
+const introVideo = ref(null)
+const fadeOut = ref(false)
+
+
+const closeIntro = () => {
+  console.log('[Intro] closeIntro called')
+  fadeOut.value = true
+  localStorage.setItem('introWatched', '1')
+  // 0.7秒後にオーバーレイ非表示
+  setTimeout(() => {
+    showIntroOverlay.value = false
+    showIntro.value = false
+    fadeOut.value = false
+  }, 700)
+}
+
+onMounted(() => {
+  const watched = localStorage.getItem('introWatched')
+  console.log('[Intro] onMounted, introWatched:', watched)
+  if (!watched) {
+    showIntro.value = true
+    showIntroOverlay.value = true
+    console.log('[Intro] showIntro set to true')
+  } else {
+    console.log('[Intro] showIntro remains false')
+  }
+})
 import emailjs from '@emailjs/browser'
 import Coloring from './views/Coloring.vue'
 import Counter from './views/Counter.vue'
@@ -205,7 +236,6 @@ const signup = async () => {
   }
 }
 
-
 // 認証状態
 // const user = ref(null)
 const email = ref('')
@@ -227,17 +257,6 @@ const login = async () => {
 const logout = () => {
   signOut(auth)
 }
-
-// 認証状態監視
-// onAuthStateChanged(auth, (currentUser) => {
-//   user.value = currentUser
-//   if (currentUser) {
-//     loadData()  // ログインしたらデータを読み込む
-//     loadUserName()
-//   }
-// })
-
-
 
 // プロフィール・LINEプロフィール一括読み込み（1回のDB取得で反映）
 const loadUserData = async () => {
@@ -279,10 +298,22 @@ watch(user, (newUser) => {
 <!-- /////////////////////////////////////////////////////////////////////////// -->
 
 <template>
+  <!-- イントロ動画（初回のみ） -->
+  <div v-if="showIntroOverlay" :class="['intro-video-overlay', fadeOut ? 'fade-out' : '']" @click="closeIntro">
+    <video
+      ref="introVideo"
+      class="intro-video"
+      src="/video/StarAnimated.mp4"
+      autoplay
+      muted
+      playsinline
+      @ended="closeIntro"
+    ></video>
+  </div>
 
   <!-- ログインフォーム -->
   <div v-if="!user" class="login-form">
-    <h2>ログイン</h2>
+    <h2 style="margin: 0px; padding: 4px">ログイン</h2>
     <input v-model="email" type="email" placeholder="メールアドレス" />
     <input v-model="password" type="password" placeholder="パスワード" />
     <button @click="login">ログイン</button>
@@ -325,7 +356,8 @@ watch(user, (newUser) => {
   <!-- ナビゲーション -->
   <div class="page">
     <!-- ホーム画面のページ -->
-    <div v-if="route.path === '/home' || route.path === '/'">
+    <div v-if="route.path === '/home' || route.path === '/'" 
+    class="page-home">
       <h1>カウンタ・メモ・色塗りができますよ</h1>
     </div>
 
@@ -418,6 +450,41 @@ watch(user, (newUser) => {
   display: block;
 }
 
+.intro-video-overlay {
+  position: fixed;
+  z-index: 9999;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #000c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+.fade-out {
+  animation: fadeOutOverlay 0.7s forwards;
+}
+
+@keyframes fadeOutOverlay {
+  0% {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  100% {
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+.intro-video {
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
+  border-radius: 0;
+  box-shadow: none;
+}
+
 /* スマホ用に相対サイズ */
 /* @media (max-width: 767px) {
   .nav-icon {
@@ -426,14 +493,32 @@ watch(user, (newUser) => {
   }
 } */
 
+.login-form {
+  /* max-width: 320px; */
+  /* margin: 100px auto; */
+  /* padding-top: 16px; */
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #f9f9f9;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
 
 .page {
   text-align: center;
-  margin-top: 150px;
+  /* padding-top: 50px; */
 } 
 
+.page-home {
+  background-image: url('image/backgroundImage.webp');
+  background-repeat: repeat;
+  background-attachment: fixed;
+  background-size: 100% auto;
+  min-height: 100vh;
+  padding-top: 100px;
+}
+
 .underline {
-  margin-top: 400px; /* ナビゲーションバー分の余白を確保 */}
+  padding-bottom: 400px; /* ナビゲーションバー分の余白を確保 */}
 
 
 .header-icon {

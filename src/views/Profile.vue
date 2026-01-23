@@ -176,6 +176,7 @@ const genderCategory = ref([
 
 <style scoped>
 .profile-page {
+  padding-top: 100px;
   text-align: center;
   /* padding: 20px; */
   margin-left: 20px;

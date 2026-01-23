@@ -1,6 +1,4 @@
 <script setup>
-// やりたいこと
-// このモードに、削除モード、追加モードを統合する
 
 import { defineProps, defineEmits, ref } from 'vue'
 

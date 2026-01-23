@@ -313,7 +313,7 @@ const saveToDevice = () => {
 
 <template>
   <div class="coloring-container">
-    <h1>塗り絵</h1>
+    <h1 style="margin: 0px; padding: 20px">塗り絵</h1>
     
     <!-- 画像アップロード -->
     <div class="upload-section">
@@ -354,7 +354,7 @@ const saveToDevice = () => {
 <style scoped>
 .coloring-container {
   text-align: center;
-  /* padding: 20px; */
+  padding-top: 100px;
   
 }
 

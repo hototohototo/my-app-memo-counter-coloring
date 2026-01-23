@@ -173,7 +173,7 @@ watch(memoData, () => {
 
 <template>
   <div class="memo-container">
-    <h1>メモ帳</h1>
+    <h1 style="margin: 0px; padding: 20px">メモ帳</h1>
     <textarea 
       v-model="memoData.memoText1" 
       @input="autoSave"
@@ -219,7 +219,7 @@ watch(memoData, () => {
 
 <style scoped>
 .memo-container {
-  padding: 0px;
+  padding-top: 100px;
   margin-left: 30px;
   margin-right: 30px;
 }
